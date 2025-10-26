@@ -1,0 +1,5 @@
+{
+  "name": "F1 Race Control",
+  "description": "A comprehensive F1 team and race management application. This platform allows admins to manage teams, drivers, and sponsors, while stewards can review races, log incidents, and issue penalties to determine final race outcomes.",
+  "requestFramePermissions": []
+}

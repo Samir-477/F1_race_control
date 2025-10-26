@@ -1,0 +1,162 @@
+// This is your Prisma schema file.
+// provider specifies the database you are using (e.g., mysql, postgresql)
+// url is your database connection string, usually stored in a .env file.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ENUMS define a set of allowed values for a field.
+enum UserRole {
+  ADMIN
+  STEWARD
+}
+
+enum PenaltyType {
+  TimePenalty
+  GridPenalty
+  Warning
+  NoFurtherAction
+}
+
+// MODELS represent the tables in your database.
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String   // In a real application, this should be a hashed value.
+  role      UserRole
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Team {
+  id                 Int      @id @default(autoincrement())
+  name               String   @unique
+  fullName           String
+  description        String   @db.Text
+  base               String
+  teamChief          String
+  color              String
+  textColor          String
+  backgroundImageUrl String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relational fields
+  drivers     Driver[]
+  car         Car? // A team has one car (optional relation)
+  sponsors    Sponsor[]    @relation("TeamSponsors")
+  raceResults RaceResult[]
+}
+
+model Driver {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  number             Int      @unique
+  nationality        String
+  podiums            Int      @default(0)
+  points             Float    @default(0) // Points can be .5
+  worldChampionships Int      @default(0)
+  imageUrl           String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relation to Team (Many-to-One)
+  team   Team @relation(fields: [teamId], references: [id])
+  teamId Int
+
+  // Other relations
+  raceResults RaceResult[]
+  incidents   RaceIncident[]
+}
+
+model Car {
+  id        Int      @id @default(autoincrement())
+  model     String
+  engine    String
+  chassis   String
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // One-to-One relation with Team
+  team   Team @relation(fields: [teamId], references: [id])
+  teamId Int  @unique
+}
+
+model Sponsor {
+  id      Int    @id @default(autoincrement())
+  name    String @unique
+  logoUrl String
+
+  // Many-to-Many relation with Team
+  teams Team[] @relation("TeamSponsors")
+}
+
+model Race {
+  id        Int      @id @default(autoincrement())
+  name      String
+  location  String
+  date      DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  results   RaceResult[]
+  incidents RaceIncident[]
+}
+
+model RaceResult {
+  id         Int      @id @default(autoincrement())
+  position   Int
+  time       String   // Using String to accommodate formats like "+7.152s" or "DNF"
+  points     Float
+  penalty    String   @default("0s")
+  fastestLap String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  race     Race   @relation(fields: [raceId], references: [id])
+  raceId   Int
+  driver   Driver @relation(fields: [driverId], references: [id])
+  driverId Int
+  team     Team   @relation(fields: [teamId], references: [id])
+  teamId   Int
+
+  @@unique([raceId, driverId]) // A driver can only have one result per race
+}
+
+model RaceIncident {
+  id          Int       @id @default(autoincrement())
+  lap         Int
+  description String    @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  race     Race   @relation(fields: [raceId], references: [id])
+  raceId   Int
+  driver   Driver @relation(fields: [driverId], references: [id])
+  driverId Int
+
+  penalty   Penalty? @relation(fields: [penaltyId], references: [id])
+  penaltyId Int?     @unique // An incident can have at most one penalty
+}
+
+model Penalty {
+  id        Int         @id @default(autoincrement())
+  type      PenaltyType
+  value     String      // e.g., "5 seconds", "3 grid places"
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  // Relation
+  incident RaceIncident?
+}
