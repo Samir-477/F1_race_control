@@ -14,13 +14,11 @@ export interface Car {
   model: string;
   engine: string;
   chassis: string;
-  imageUrl: string;
 }
 
 export interface Sponsor {
   id: number;
   name: string;
-  logoUrl: string;
 }
 
 export interface Team {
@@ -31,12 +29,10 @@ export interface Team {
   base: string;
   teamChief: string;
   drivers: Driver[];
-  topPerformer: Driver;
-  car: Car;
+  topPerformer?: Driver;
+  car?: Car;
   sponsors: Sponsor[];
-  color: string;
-  textColor: string;
-  backgroundImageUrl: string;
+  color: string; // Hex color code
 }
 
 export interface RaceIncident {
@@ -73,13 +69,13 @@ export interface Race {
 }
 
 export enum UserRole {
-  ADMIN = 'admin',
-  STEWARD = 'steward',
-  GUEST = 'guest'
+  ADMIN = 'ADMIN',
+  STEWARD = 'STEWARD',
+  GUEST = 'GUEST'
 }
 
 export interface User {
   id: number;
   username: string;
-  role: UserRole;
+  role: UserRole | string;
 }

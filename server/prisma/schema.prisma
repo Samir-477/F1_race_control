@@ -36,17 +36,15 @@ model User {
 }
 
 model Team {
-  id                 Int      @id @default(autoincrement())
-  name               String   @unique
-  fullName           String
-  description        String   @db.Text
-  base               String
-  teamChief          String
-  color              String
-  textColor          String
-  backgroundImageUrl String
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  fullName    String
+  description String   @db.Text
+  base        String
+  teamChief   String
+  color       String   // Hex color code (e.g., #FF0000)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relational fields
   drivers     Driver[]
@@ -58,7 +56,7 @@ model Team {
 model Driver {
   id                 Int      @id @default(autoincrement())
   name               String
-  number             Int      @unique
+  number             Int
   nationality        String
   podiums            Int      @default(0)
   points             Float    @default(0) // Points can be .5
@@ -74,6 +72,9 @@ model Driver {
   // Other relations
   raceResults RaceResult[]
   incidents   RaceIncident[]
+
+  // Composite unique constraint: number must be unique per team
+  @@unique([teamId, number])
 }
 
 model Car {
@@ -81,7 +82,6 @@ model Car {
   model     String
   engine    String
   chassis   String
-  imageUrl  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -91,9 +91,8 @@ model Car {
 }
 
 model Sponsor {
-  id      Int    @id @default(autoincrement())
-  name    String @unique
-  logoUrl String
+  id   Int    @id @default(autoincrement())
+  name String @unique
 
   // Many-to-Many relation with Team
   teams Team[] @relation("TeamSponsors")

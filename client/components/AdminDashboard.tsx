@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import type { Team, Driver, Sponsor, Car } from '../types';
-import { TEAMS } from '../data/mockData';
 import { useAuth } from '../contexts/AuthContext';
+import CreateTeamModal from './CreateTeamModal';
+import StewardManagement from './StewardManagement';
 
 // Sub-components for the Team Editor
 const EditorTabButton: React.FC<{ active: boolean; onClick: () => void; children: React.ReactNode }> = ({ active, onClick, children }) => (
@@ -58,27 +60,50 @@ const SaveButton: React.FC = () => (
 
 
 // Team Editor Component
-const TeamEditor: React.FC<{ team: Team; onBack: () => void }> = ({ team, onBack }) => {
+const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => void }> = ({ team, onBack, onUpdate }) => {
   const [activeTab, setActiveTab] = useState('details');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const handleSubmit = async (formData: any, section?: string) => {
     setLoading(true);
-    setError('');
-    setSuccess('');
 
     try {
-      const token = localStorage.getItem('token'); // Get the JWT token
-      const response = await fetch(`/api/teams/${team.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(section ? { [section]: formData } : formData)
-      });
+      const token = localStorage.getItem('token');
+      let response;
+
+      // Handle driver creation separately
+      if (section === 'drivers') {
+        response = await fetch(`http://localhost:4000/api/teams/${team.id}/drivers`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(formData)
+        });
+      }
+      // Handle sponsor creation separately
+      else if (section === 'sponsors') {
+        response = await fetch(`http://localhost:4000/api/teams/${team.id}/sponsors`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(formData)
+        });
+      }
+      // Handle team details and car updates
+      else {
+        response = await fetch(`http://localhost:4000/api/teams/${team.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(section ? { [section]: formData } : formData)
+        });
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -86,16 +111,14 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void }> = ({ team, onBack
       }
 
       const updatedTeam = await response.json();
-      setSuccess('Team updated successfully!');
-      setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
+      toast.success('Team updated successfully!');
       
-      // Update the team data in parent component
-      if (typeof onBack === 'function') {
-        onBack(); // This should trigger a refresh in the parent
+      // Call onUpdate to refresh team data without leaving the page
+      if (onUpdate) {
+        onUpdate();
       }
     } catch (err: any) {
-      setError(err.message);
-      setTimeout(() => setError(''), 5000); // Clear error message after 5 seconds
+      toast.error(err.message || 'Failed to update team');
     } finally {
       setLoading(false);
     }
@@ -106,16 +129,33 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void }> = ({ team, onBack
       case 'details':
         return (
           <>
-            {error && <div className="bg-red-500/10 border border-red-500 text-red-500 p-3 rounded mb-4">{error}</div>}
-            {success && <div className="bg-green-500/10 border border-green-500 text-green-500 p-3 rounded mb-4">{success}</div>}
             <FormSection title="Team Details" onSubmit={handleSubmit}>
               <FormInput id="name" name="name" label="Team Name" value={team.name} required />
               <FormInput id="fullName" name="fullName" label="Full Name" value={team.fullName} required />
               <FormInput id="description" name="description" label="Description" value={team.description} required />
               <FormInput id="base" name="base" label="Base" value={team.base} required />
               <FormInput id="teamChief" name="teamChief" label="Team Chief" value={team.teamChief} required />
-              <FormInput id="color" name="color" label="Team Color" value={team.color} required type="color" />
-              <FormInput id="textColor" name="textColor" label="Text Color" value={team.textColor} required type="color" />
+              <div>
+                <label htmlFor="color" className="block text-base font-medium text-gray-300 mb-1">Team Color</label>
+                <div className="flex items-center gap-3">
+                  <input 
+                    type="color" 
+                    id="color"
+                    name="color"
+                    defaultValue={team.color}
+                    required
+                    className="h-12 w-16 bg-gray-800 border border-gray-600 rounded cursor-pointer" 
+                  />
+                  <input 
+                    type="text" 
+                    name="color"
+                    defaultValue={team.color}
+                    required
+                    placeholder="#FF0000"
+                    className="flex-1 p-2 rounded bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition text-base font-mono" 
+                  />
+                </div>
+              </div>
               <SaveButton />
             </FormSection>
           </>
@@ -123,8 +163,6 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void }> = ({ team, onBack
       case 'drivers':
         return (
           <>
-            {error && <div className="bg-red-500/10 border border-red-500 text-red-500 p-3 rounded mb-4">{error}</div>}
-            {success && <div className="bg-green-500/10 border border-green-500 text-green-500 p-3 rounded mb-4">{success}</div>}
             <FormSection title={`Manage Drivers for ${team.name}`} onSubmit={(data) => handleSubmit(data, 'drivers')}>
               {team.drivers.map(driver => (
                 <div key={driver.id} className="bg-gray-900/50 p-3 rounded-md text-base flex justify-between items-center">
@@ -143,10 +181,10 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void }> = ({ team, onBack
                             'Authorization': `Bearer ${token}`
                           }
                         });
-                        setSuccess('Driver removed successfully');
-                        if (typeof onBack === 'function') onBack();
+                        toast.success('Driver removed successfully');
+                        if (onUpdate) onUpdate();
                       } catch (err: any) {
-                        setError(err.message);
+                        toast.error(err.message || 'Failed to remove driver');
                       }
                     }}
                     className="text-red-500 hover:text-red-400 p-2"
@@ -176,21 +214,12 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void }> = ({ team, onBack
       case 'sponsors':
         return (
           <>
-            {error && <div className="bg-red-500/10 border border-red-500 text-red-500 p-3 rounded mb-4">{error}</div>}
-            {success && <div className="bg-green-500/10 border border-green-500 text-green-500 p-3 rounded mb-4">{success}</div>}
             <FormSection title={`Manage Sponsors for ${team.name}`} onSubmit={(data) => handleSubmit(data, 'sponsors')}>
               <div className="space-y-3">
                 {team.sponsors.map(sponsor => (
                   <div key={sponsor.id} className="bg-gray-900/50 p-3 rounded-md text-base flex justify-between items-center">
                     <div>
                       <p className="font-bold">{sponsor.name}</p>
-                      {sponsor.logoUrl && (
-                        <img 
-                          src={sponsor.logoUrl} 
-                          alt={sponsor.name} 
-                          className="h-8 object-contain mt-2"
-                        />
-                      )}
                     </div>
                     <button
                       type="button"
@@ -203,10 +232,10 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void }> = ({ team, onBack
                               'Authorization': `Bearer ${token}`
                             }
                           });
-                          setSuccess('Sponsor removed successfully');
-                          if (typeof onBack === 'function') onBack();
+                          toast.success('Sponsor removed successfully');
+                          if (onUpdate) onUpdate();
                         } catch (err: any) {
-                          setError(err.message);
+                          toast.error(err.message || 'Failed to remove sponsor');
                         }
                       }}
                       className="text-red-500 hover:text-red-400 p-2"
@@ -218,7 +247,6 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void }> = ({ team, onBack
               </div>
               <div className="mt-6 space-y-4">
                 <FormInput id="sponsorName" name="name" label="Sponsor Name" required />
-                <FormInput id="sponsorLogoUrl" name="logoUrl" label="Logo URL" />
                 <button 
                   type="submit" 
                   className="w-full text-base bg-yellow-500 hover:bg-yellow-600 text-black p-2 rounded font-bold"
@@ -232,13 +260,10 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void }> = ({ team, onBack
       case 'car':
         return (
           <>
-            {error && <div className="bg-red-500/10 border border-red-500 text-red-500 p-3 rounded mb-4">{error}</div>}
-            {success && <div className="bg-green-500/10 border border-green-500 text-green-500 p-3 rounded mb-4">{success}</div>}
-            <FormSection title={`Car Details for ${team.name}`} onSubmit={(data) => handleSubmit({ car: data }, 'car')}>
+            <FormSection title={`Car Details for ${team.name}`} onSubmit={(data) => handleSubmit(data, 'car')}>
               <FormInput id="model" name="model" label="Model" value={team.car?.model} required />
               <FormInput id="engine" name="engine" label="Engine" value={team.car?.engine} required />
               <FormInput id="chassis" name="chassis" label="Chassis" value={team.car?.chassis} required />
-              <FormInput id="imageUrl" name="imageUrl" label="Car Image URL (Optional)" value={team.car?.imageUrl} />
               <div className="mt-4">
                 {loading ? (
                   <button 
@@ -282,35 +307,66 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void }> = ({ team, onBack
 
 
 const AdminDashboard: React.FC = () => {
-  const [activeView, setActiveView] = useState('teams'); // 'teams' or 'stewards'
-  const [teams, setTeams] = useState<Team[]>(TEAMS);
+  const [activeView, setActiveView] = useState<'teams' | 'stewards'>('teams');
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useAuth();
+
+  useEffect(() => {
+    fetchTeams();
+  }, []);
+
+  const fetchTeams = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:4000/api/teams');
+      if (response.ok) {
+        const data = await response.json();
+        setTeams(data);
+      } else {
+        toast.error('Failed to fetch teams');
+      }
+    } catch (error) {
+      console.error('Fetch teams error:', error);
+      toast.error('Failed to fetch teams');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateSuccess = () => {
+    fetchTeams();
+    setShowCreateModal(false);
+  };
 
 
   const renderMainContent = () => {
     if (activeView === 'stewards') {
-      return (
-         <div className="bg-[#161b22] p-6 rounded-lg border border-gray-700">
-           <FormSection title="Create New Steward">
-              <FormInput id="stewardUser" label="Username" />
-              <FormInput id="stewardPass" label="Password" type="password" />
-              <SaveButton />
-            </FormSection>
-         </div>
-      );
+      return <StewardManagement />;
     }
 
     // Team Management View
     if (editingTeam) {
-      return <TeamEditor team={editingTeam} onBack={() => setEditingTeam(null)} />;
+      const currentTeam = teams.find(t => t.id === editingTeam.id) || editingTeam;
+      return (
+        <TeamEditor 
+          team={currentTeam} 
+          onBack={() => { setEditingTeam(null); fetchTeams(); }}
+          onUpdate={fetchTeams}
+        />
+      );
     }
 
     return (
       <div className="bg-[#161b22] p-6 rounded-lg border border-gray-700">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-bold">Team Management</h2>
-          <button className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded transition-colors text-base">
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded transition-colors text-base"
+          >
             Create New Team
           </button>
         </div>
@@ -363,6 +419,13 @@ const AdminDashboard: React.FC = () => {
           </main>
         </div>
       </div>
+      
+      {showCreateModal && (
+        <CreateTeamModal 
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={handleCreateSuccess}
+        />
+      )}
     </div>
   );
 };
