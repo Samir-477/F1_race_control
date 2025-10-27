@@ -62,10 +62,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ teams, races }) => {
           {teams.map((team, index) => (
             <div
               key={team.id}
-              className={`absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
-              style={{ backgroundImage: `url(${team.backgroundImageUrl})` }}
+              className={`absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+              style={{ backgroundImage: `url('${team.backgroundImageUrl}')` }}
+              aria-hidden={index === currentIndex ? 'false' : 'true'}
             >
-              <div className="absolute inset-0 bg-black/80"></div>
+              {/* lowered overlay opacity so background image is more visible */}
+              <div className="absolute inset-0 bg-black/30"></div>
             </div>
           ))}
         </div>

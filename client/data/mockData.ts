@@ -26,25 +26,65 @@ const w15: Car = { model: 'W15', engine: 'Mercedes-AMG F1 M15', chassis: 'Carbon
 
 // Teams
 export const TEAMS: Team[] = [
-  { 
-    id: 1, name: 'Red Bull', fullName: 'Oracle Red Bull Racing', 
+  {
+    id: 1,
+    name: 'Red Bull',
+    fullName: 'Oracle Red Bull Racing',
     description: 'Oracle Red Bull Racing is a Formula One racing team, racing under an Austrian licence and based in the United Kingdom.',
-    base: 'Milton Keynes, UK', teamChief: 'Christian Horner', drivers: [maxVerstappen, sergioPerez], topPerformer: maxVerstappen, car: rb20, sponsors: [oracle, castore], color: 'bg-blue-900', textColor: 'text-red-500', backgroundImageUrl: 'https://storage.googleapis.com/aistudio-hosting/workspace-assets/7b94101e-2191-4999-a67b-1178a0d4c552/redbull.jpeg' 
+    base: 'Milton Keynes, UK',
+    teamChief: 'Christian Horner',
+    drivers: [maxVerstappen, sergioPerez],
+    topPerformer: maxVerstappen,
+    car: rb20,
+    sponsors: [oracle, castore],
+    color: 'bg-blue-900',
+    textColor: 'text-red-500',
+  backgroundImageUrl: '/images/red_bull.png',
   },
-  { 
-    id: 2, name: 'McLaren', fullName: 'McLaren Formula 1 Team', 
+  {
+    id: 2,
+    name: 'McLaren',
+    fullName: 'McLaren Formula 1 Team',
     description: 'McLaren Racing Limited is a British motor racing team based at the McLaren Technology Centre in Woking, Surrey, England.',
-    base: 'Woking, UK', teamChief: 'Andrea Stella', drivers: [landoNorris, oscarPiastri], topPerformer: landoNorris, car: mcl38, sponsors: [google], color: 'bg-orange-500', textColor: 'text-blue-400', backgroundImageUrl: 'https://storage.googleapis.com/aistudio-hosting/workspace-assets/7b94101e-2191-4999-a67b-1178a0d4c552/mclaren.jpeg' 
+    base: 'Woking, UK',
+    teamChief: 'Andrea Stella',
+    drivers: [landoNorris, oscarPiastri],
+    topPerformer: landoNorris,
+    car: mcl38,
+    sponsors: [google],
+    color: 'bg-orange-500',
+    textColor: 'text-blue-400',
+  backgroundImageUrl: '/images/mclearn.jpg',
   },
-  { 
-    id: 3, name: 'Ferrari', fullName: 'Scuderia Ferrari', 
+  {
+    id: 3,
+    name: 'Ferrari',
+    fullName: 'Scuderia Ferrari',
     description: 'Scuderia Ferrari is the racing division of luxury Italian auto manufacturer Ferrari and the racing team that competes in Formula One racing.',
-    base: 'Maranello, Italy', teamChief: 'Frédéric Vasseur', drivers: [charlesLeclerc, carlosSainz], topPerformer: charlesLeclerc, car: sf24, sponsors: [hp], color: 'bg-red-600', textColor: 'text-yellow-400', backgroundImageUrl: 'https://storage.googleapis.com/aistudio-hosting/workspace-assets/7b94101e-2191-4999-a67b-1178a0d4c552/ferrari.jpeg' 
+    base: 'Maranello, Italy',
+    teamChief: 'Frédéric Vasseur',
+    drivers: [charlesLeclerc, carlosSainz],
+    topPerformer: charlesLeclerc,
+    car: sf24,
+    sponsors: [hp],
+    color: 'bg-red-600',
+    textColor: 'text-yellow-400',
+  backgroundImageUrl: '/images/Ferrari.png',
   },
-  { 
-    id: 4, name: 'Mercedes', fullName: 'Mercedes-AMG PETRONAS F1 Team', 
+  {
+    id: 4,
+    name: 'Mercedes',
+    fullName: 'Mercedes-AMG PETRONAS F1 Team',
     description: 'The Mercedes-AMG Petronas Formula One Team is the works team of Mercedes-Benz, competing in the FIA Formula One World Championship.',
-    base: 'Brackley, UK', teamChief: 'Toto Wolff', drivers: [lewisHamilton, georgeRussell], topPerformer: lewisHamilton, car: w15, sponsors: [petronas], color: 'bg-teal-500', textColor: 'text-black', backgroundImageUrl: 'https://storage.googleapis.com/aistudio-hosting/workspace-assets/7b94101e-2191-4999-a67b-1178a0d4c552/mercedes.jpeg' 
+    base: 'Brackley, UK',
+    teamChief: 'Toto Wolff',
+    drivers: [lewisHamilton, georgeRussell],
+    topPerformer: lewisHamilton,
+    car: w15,
+    sponsors: [petronas],
+    color: 'bg-teal-500',
+    textColor: 'text-black',
+  backgroundImageUrl: '/images/mercdes.png',
   },
 ];
 
