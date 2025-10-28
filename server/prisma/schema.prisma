@@ -24,6 +24,25 @@ enum PenaltyType {
   NoFurtherAction
 }
 
+enum RaceStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PenaltyStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum LogSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
 // MODELS represent the tables in your database.
 
 model User {
@@ -33,6 +52,10 @@ model User {
   role      UserRole
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Relations
+  penaltyAssignments PenaltyAssignment[]
+  approvedPenalties  PenaltyAssignment[] @relation("PenaltyApprover")
 }
 
 model Team {
@@ -47,10 +70,12 @@ model Team {
   updatedAt   DateTime @updatedAt
 
   // Relational fields
-  drivers     Driver[]
-  car         Car? // A team has one car (optional relation)
-  sponsors    Sponsor[]    @relation("TeamSponsors")
-  raceResults RaceResult[]
+  drivers        Driver[]
+  car            Car? // A team has one car (optional relation)
+  sponsors       Sponsor[]    @relation("TeamSponsors")
+  raceResults    RaceResult[]
+  participations RaceParticipation[]
+  raceLogs       RaceLog[]
 }
 
 model Driver {
@@ -66,12 +91,13 @@ model Driver {
   updatedAt          DateTime @updatedAt
 
   // Relation to Team (Many-to-One)
-  team   Team @relation(fields: [teamId], references: [id])
+  team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
   teamId Int
 
   // Other relations
   raceResults RaceResult[]
   incidents   RaceIncident[]
+  raceLogs    RaceLog[]
 
   // Composite unique constraint: number must be unique per team
   @@unique([teamId, number])
@@ -98,17 +124,65 @@ model Sponsor {
   teams Team[] @relation("TeamSponsors")
 }
 
-model Race {
+model Circuit {
   id        Int      @id @default(autoincrement())
-  name      String
+  name      String   @unique
   location  String
-  date      DateTime
+  country   String
+  length    Float    // Circuit length in km
+  laps      Int      // Number of laps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  results   RaceResult[]
-  incidents RaceIncident[]
+  races Race[]
+}
+
+model Season {
+  id        Int      @id @default(autoincrement())
+  year      Int      @unique
+  name      String   // e.g., "2024 Formula 1 World Championship"
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  races Race[]
+}
+
+model RaceParticipation {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  race   Race @relation(fields: [raceId], references: [id], onDelete: Cascade)
+  raceId Int
+  team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId Int
+
+  @@unique([raceId, teamId]) // A team can only participate once per race
+}
+
+model Race {
+  id        Int        @id @default(autoincrement())
+  name      String
+  date      DateTime
+  status    RaceStatus @default(SCHEDULED)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relations
+  circuit   Circuit @relation(fields: [circuitId], references: [id])
+  circuitId Int
+  season    Season @relation(fields: [seasonId], references: [id])
+  seasonId  Int
+
+  // Other relations
+  results        RaceResult[]
+  incidents      RaceIncident[]
+  participations RaceParticipation[]
+  logs           RaceLog[]
 }
 
 model RaceResult {
@@ -124,7 +198,7 @@ model RaceResult {
   // Relations
   race     Race   @relation(fields: [raceId], references: [id])
   raceId   Int
-  driver   Driver @relation(fields: [driverId], references: [id])
+  driver   Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
   driverId Int
   team     Team   @relation(fields: [teamId], references: [id])
   teamId   Int
@@ -142,11 +216,13 @@ model RaceIncident {
   // Relations
   race     Race   @relation(fields: [raceId], references: [id])
   raceId   Int
-  driver   Driver @relation(fields: [driverId], references: [id])
+  driver   Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
   driverId Int
 
   penalty   Penalty? @relation(fields: [penaltyId], references: [id])
   penaltyId Int?     @unique // An incident can have at most one penalty
+
+  penaltyAssignments PenaltyAssignment[]
 }
 
 model Penalty {
@@ -158,4 +234,39 @@ model Penalty {
 
   // Relation
   incident RaceIncident?
+}
+
+model RaceLog {
+  id          Int         @id @default(autoincrement())
+  lap         Int
+  timestamp   DateTime    @default(now())
+  description String      @db.Text
+  severity    LogSeverity @default(INFO)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  race     Race   @relation(fields: [raceId], references: [id], onDelete: Cascade)
+  raceId   Int
+  driver   Driver? @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  driverId Int?
+  team     Team?   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId   Int?
+}
+
+model PenaltyAssignment {
+  id        Int           @id @default(autoincrement())
+  status    PenaltyStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // Relations
+  incident   RaceIncident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  incidentId Int
+  steward     User         @relation(fields: [stewardId], references: [id])
+  stewardId   Int
+  approvedBy  User?         @relation("PenaltyApprover", fields: [approvedById], references: [id])
+  approvedById Int?
+
+  @@unique([incidentId, stewardId]) // A steward can only assign one penalty per incident
 }

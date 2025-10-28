@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { Race } from '../types';
 import { TEAMS } from '../data/mockData';

@@ -4,6 +4,7 @@ import type { Team, Driver, Sponsor, Car } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import CreateTeamModal from './CreateTeamModal';
 import StewardManagement from './StewardManagement';
+import RaceManagement from './RaceManagement';
 
 // Sub-components for the Team Editor
 const EditorTabButton: React.FC<{ active: boolean; onClick: () => void; children: React.ReactNode }> = ({ active, onClick, children }) => (
@@ -73,7 +74,7 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => vo
 
       // Handle driver creation separately
       if (section === 'drivers') {
-        response = await fetch(`http://localhost:4000/api/teams/${team.id}/drivers`, {
+        response = await fetch(`http://localhost:3002/api/teams/${team.id}/drivers`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -84,7 +85,7 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => vo
       }
       // Handle sponsor creation separately
       else if (section === 'sponsors') {
-        response = await fetch(`http://localhost:4000/api/teams/${team.id}/sponsors`, {
+        response = await fetch(`http://localhost:3002/api/teams/${team.id}/sponsors`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -95,7 +96,7 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => vo
       }
       // Handle team details and car updates
       else {
-        response = await fetch(`http://localhost:4000/api/teams/${team.id}`, {
+        response = await fetch(`http://localhost:3002/api/teams/${team.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -175,7 +176,7 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => vo
                     onClick={async () => {
                       try {
                         const token = localStorage.getItem('token');
-                        await fetch(`/api/teams/${team.id}/drivers/${driver.id}`, {
+                        await fetch(`http://localhost:3002/api/teams/${team.id}/drivers/${driver.id}`, {
                           method: 'DELETE',
                           headers: {
                             'Authorization': `Bearer ${token}`
@@ -226,7 +227,7 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => vo
                       onClick={async () => {
                         try {
                           const token = localStorage.getItem('token');
-                          await fetch(`/api/teams/${team.id}/sponsors/${sponsor.id}`, {
+                          await fetch(`http://localhost:3002/api/teams/${team.id}/sponsors/${sponsor.id}`, {
                             method: 'DELETE',
                             headers: {
                               'Authorization': `Bearer ${token}`
@@ -321,7 +322,7 @@ const AdminDashboard: React.FC = () => {
   const fetchTeams = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/api/teams');
+      const response = await fetch('http://localhost:3002/api/teams');
       if (response.ok) {
         const data = await response.json();
         setTeams(data);
@@ -345,6 +346,10 @@ const AdminDashboard: React.FC = () => {
   const renderMainContent = () => {
     if (activeView === 'stewards') {
       return <StewardManagement />;
+    }
+
+    if (activeView === 'races') {
+      return <RaceManagement />;
     }
 
     // Team Management View
@@ -412,6 +417,7 @@ const AdminDashboard: React.FC = () => {
             <nav className="flex flex-col gap-2">
               <SidebarButton viewName="teams" label="Team Management" />
               <SidebarButton viewName="stewards" label="Steward Management" />
+              <SidebarButton viewName="races" label="Race Management" />
             </nav>
           </aside>
           <main className="flex-1">

@@ -22,7 +22,7 @@ const StewardManagement: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:4000/api/stewards', {
+      const response = await fetch('http://localhost:3002/api/stewards', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -58,8 +58,8 @@ const StewardManagement: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       const url = editingId 
-        ? `http://localhost:4000/api/stewards/${editingId}`
-        : 'http://localhost:4000/api/stewards';
+        ? `http://localhost:3002/api/stewards/${editingId}`
+        : 'http://localhost:3002/api/stewards';
       
       const response = await fetch(url, {
         method: editingId ? 'PUT' : 'POST',
@@ -92,7 +92,7 @@ const StewardManagement: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:4000/api/stewards/${id}`, {
+      const response = await fetch(`http://localhost:3002/api/stewards/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
