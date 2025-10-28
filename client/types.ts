@@ -14,11 +14,13 @@ export interface Car {
   model: string;
   engine: string;
   chassis: string;
+  imageUrl?: string;
 }
 
 export interface Sponsor {
   id: number;
   name: string;
+  logoUrl?: string;
 }
 
 export interface Team {
@@ -33,6 +35,8 @@ export interface Team {
   car?: Car;
   sponsors: Sponsor[];
   color: string; // Hex color code
+  textColor?: string;
+  backgroundImageUrl?: string;
 }
 
 export interface RaceIncident {

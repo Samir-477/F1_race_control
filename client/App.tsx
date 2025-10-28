@@ -49,7 +49,7 @@ const AppContent: React.FC = () => {
     }
     
     // Default to landing page
-    return <LandingPage teams={TEAMS} races={RACES} />;
+    return <LandingPage teams={TEAMS} />;
   };
 
   return (

@@ -1,10 +1,9 @@
 import React, { useState, useRef } from 'react';
-import type { Team, Race, Driver } from '../types';
+import type { Team, Driver } from '../types';
 import RaceResults from './RaceResults';
 
 interface LandingPageProps {
   teams: Team[];
-  races: Race[];
 }
 
 interface TopPerformerCardProps {
@@ -29,7 +28,7 @@ const TopPerformerCard: React.FC<TopPerformerCardProps> = ({ driver, team, isVis
 };
 
 
-const LandingPage: React.FC<LandingPageProps> = ({ teams, races }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ teams }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
   const raceResultsRef = useRef<HTMLDivElement>(null);
@@ -111,7 +110,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ teams, races }) => {
         </div>
       </div>
       <div ref={raceResultsRef}>
-        <RaceResults races={races} />
+        <RaceResults />
       </div>
     </>
   );

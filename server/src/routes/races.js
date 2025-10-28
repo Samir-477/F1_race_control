@@ -1,6 +1,7 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '../middleware/auth.js';
+import * as raceController from '../controllers/raceController.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -45,6 +46,7 @@ router.get('/races', async (req, res) => {
       include: {
         circuit: true,
         season: true,
+        logs: true, // Include logs to check if they exist
         participations: {
           include: {
             team: {
@@ -63,6 +65,68 @@ router.get('/races', async (req, res) => {
   } catch (error) {
     console.error('Get races error:', error);
     res.status(500).json({ error: 'Failed to fetch races' });
+  }
+});
+
+// Get completed races with results (for landing page)
+router.get('/races/completed', async (req, res) => {
+  try {
+    const completedRaces = await prisma.race.findMany({
+      where: { status: 'COMPLETED' },
+      include: {
+        circuit: true,
+        season: true,
+        participations: {
+          include: {
+            team: {
+              include: {
+                drivers: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { date: 'desc' },
+      take: 10 // Latest 10 completed races
+    });
+
+    // For each race, get the final standings from race logs
+    const racesWithResults = await Promise.all(
+      completedRaces.map(async (race) => {
+        // Get race standings
+        const standingsRes = await fetch(`http://localhost:3002/api/races/${race.id}/standings`, {
+          headers: { 'Authorization': req.headers.authorization || '' }
+        }).catch(() => null);
+
+        let topThree = [];
+        if (standingsRes && standingsRes.ok) {
+          const standingsData = await standingsRes.json();
+          topThree = standingsData.standings.slice(0, 3).map((s) => ({
+            position: s.position,
+            driver: s.driverName,
+            team: s.teamName,
+            time: s.totalTime,
+            penalty: s.penalty
+          }));
+        }
+
+        return {
+          id: race.id,
+          name: race.name,
+          circuit: race.circuit.name,
+          circuitLocation: race.circuit.location,
+          circuitCountry: race.circuit.country,
+          date: race.date,
+          season: race.season.year,
+          topThree
+        };
+      })
+    );
+
+    res.json(racesWithResults);
+  } catch (error) {
+    console.error('Get completed races error:', error);
+    res.status(500).json({ error: 'Failed to fetch completed races' });
   }
 });
 
@@ -681,5 +745,22 @@ function generateRaceLogs(race) {
 
   return logs.sort((a, b) => a.lap - b.lap);
 }
+
+// ===== NEW RACE MONITORING ENDPOINTS (Using Controller) =====
+
+// Generate race logs with realistic F1 simulation
+router.post('/races/:raceId/generate-race-logs', authMiddleware, raceController.generateRaceLogs);
+
+// Get race standings with penalties applied
+router.get('/races/:raceId/standings', authMiddleware, raceController.getRaceStandings);
+
+// Create incident with optional AI description
+router.post('/races/:raceId/create-incident', authMiddleware, raceController.createIncident);
+
+// Get all incidents for a race
+router.get('/races/:raceId/race-incidents', authMiddleware, raceController.getRaceIncidents);
+
+// Finalize race and publish results
+router.post('/races/:raceId/finalize', authMiddleware, raceController.finalizeRace);
 
 export default router;
