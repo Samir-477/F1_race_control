@@ -1,249 +1,635 @@
-import React, { useState, useMemo } from 'react';
-import type { Race, RaceIncident, Penalty, RaceResult, Driver } from '../types';
-import { LIVE_RACE_DATA, RACES, TEAMS } from '../data/mockData';
-import ChevronDownIcon from '../assets/ChevronDownIcon';
-import PlusIcon from '../assets/PlusIcon';
+import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 
+interface Circuit {
+  id: number;
+  name: string;
+  location: string;
+  country: string;
+  length: number;
+  laps: number;
+}
 
-const AddIncidentForm: React.FC<{ drivers: Driver[], onAddIncident: (incident: Omit<RaceIncident, 'id'>) => void, onCancel: () => void }> = ({ drivers, onAddIncident, onCancel }) => {
-  const [driverId, setDriverId] = useState<string>('');
-  const [lap, setLap] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
+interface Season {
+  id: number;
+  year: number;
+  name: string;
+  isActive: boolean;
+}
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const driver = drivers.find(d => d.id === parseInt(driverId));
-    if (driver && lap && description) {
-      onAddIncident({
-        driver,
-        lap: parseInt(lap),
-        description
-      });
-    }
+interface Driver {
+  id: number;
+  name: string;
+  number: number;
+  nationality: string;
+  team: {
+    id: number;
+    name: string;
+    color: string;
   };
+}
 
-  return (
-     <div className="p-4 bg-gray-900/50 rounded-lg mb-3">
-      <form onSubmit={handleSubmit}>
-        <h3 className="font-bold mb-3 text-xl">Log New Incident</h3>
-         <div className="space-y-3">
-            <div>
-              <label className="block text-base font-medium mb-1 text-gray-400">Driver</label>
-              <select value={driverId} onChange={e => setDriverId(e.target.value)} required className="w-full p-2 rounded bg-gray-800 border border-gray-600 text-base">
-                <option value="" disabled>Select a driver</option>
-                {drivers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-              </select>
-            </div>
-             <div>
-              <label className="block text-base font-medium mb-1 text-gray-400">Lap Number</label>
-              <input type="number" value={lap} onChange={e => setLap(e.target.value)} required placeholder="e.g., 25" className="w-full p-2 rounded bg-gray-800 border border-gray-600 text-base" />
-            </div>
-            <div>
-              <label className="block text-base font-medium mb-1 text-gray-400">Description</label>
-              <textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Describe the incident..." className="w-full p-2 rounded bg-gray-800 border border-gray-600 text-base" rows={2}></textarea>
-            </div>
-         </div>
-         <div className="flex items-center gap-2 mt-4">
-            <button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded transition-colors flex-1 text-base">
-              Add Incident
-            </button>
-            <button type="button" onClick={onCancel} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition-colors text-base">
-              Cancel
-            </button>
-         </div>
-      </form>
-    </div>
-  );
-};
+interface Team {
+  id: number;
+  name: string;
+  fullName: string;
+  color: string;
+  drivers: Driver[];
+  car: {
+    id: number;
+    model: string;
+    engine: string;
+    chassis: string;
+  } | null;
+  sponsors: Array<{
+    id: number;
+    name: string;
+  }>;
+}
 
+interface Race {
+  id: number;
+  name: string;
+  date: string;
+  status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  circuit: Circuit;
+  season: Season;
+  participations: Array<{
+    team: Team;
+  }>;
+}
 
-const IncidentReviewCard: React.FC<{ incident: RaceIncident; onToggle: () => void; isOpen: boolean; onApplyPenalty: (incidentId: number, penaltyValue: string) => void; }> = ({ incident, onToggle, isOpen, onApplyPenalty }) => {
-  const [penaltyValue, setPenaltyValue] = useState('');
-  
-  const handlePenaltySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if(penaltyValue) {
-      onApplyPenalty(incident.id, penaltyValue);
-      setPenaltyValue(''); // Reset after applying
-    }
+interface RaceLog {
+  id: number;
+  lap: number;
+  timestamp: string;
+  description: string;
+  severity: 'INFO' | 'WARNING' | 'CRITICAL';
+  driver?: Driver;
+  team?: Team;
+}
+
+interface RaceIncident {
+  id: number;
+  lap: number;
+  description: string;
+  driver: Driver;
+  penalty?: {
+    id: number;
+    type: 'TimePenalty' | 'GridPenalty' | 'Warning' | 'NoFurtherAction';
+    value: string;
   };
-
-  return (
-    <div className="bg-[#2d3748] rounded-lg overflow-hidden">
-      <button 
-        onClick={onToggle}
-        className="w-full flex justify-between items-center p-4 text-left font-semibold text-lg"
-        aria-expanded={isOpen}
-      >
-        <span>Incident #{incident.id}: {incident.driver.name} (Lap {incident.lap})</span>
-        <ChevronDownIcon className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-      {isOpen && (
-        <div className="p-4 border-t border-gray-600">
-          <p className="text-gray-300 mb-4 text-base">{incident.description}</p>
-          <form onSubmit={handlePenaltySubmit}>
-            <div className="mb-3">
-              <label className="block text-base font-medium mb-1 text-gray-400">Penalty Type</label>
-              <select className="w-full p-2 rounded bg-gray-800 border border-gray-600 text-base">
-                <option>Time Penalty</option>
-                <option>Warning</option>
-                <option>No Further Action</option>
-              </select>
-            </div>
-            <div className="mb-4">
-               <label className="block text-base font-medium mb-1 text-gray-400">Penalty Value</label>
-              <input type="text" value={penaltyValue} onChange={e => setPenaltyValue(e.target.value)} placeholder="e.g., 5s" className="w-full p-2 rounded bg-gray-800 border border-gray-600 text-base" />
-            </div>
-            <button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded transition-colors w-full text-base">
-              Approve Penalty
-            </button>
-          </form>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const allRaces = [LIVE_RACE_DATA, ...RACES];
+  penaltyAssignments: Array<{
+    id: number;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    steward: {
+      id: number;
+      username: string;
+    };
+    approvedBy?: {
+      id: number;
+      username: string;
+    };
+  }>;
+}
 
 const StewardDashboard: React.FC = () => {
-  const [selectedRace, setSelectedRace] = useState<Race>(allRaces[0]);
-  const [openIncidentId, setOpenIncidentId] = useState<number | null>(null);
-  const [isAddingIncident, setIsAddingIncident] = useState(false);
+  const [activeView, setActiveView] = useState<'monitoring' | 'history'>('monitoring');
+  const [currentRace, setCurrentRace] = useState<Race | null>(null);
+  const [raceLogs, setRaceLogs] = useState<RaceLog[]>([]);
+  const [incidents, setIncidents] = useState<RaceIncident[]>([]);
+  const [raceHistory, setRaceHistory] = useState<Race[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddIncident, setShowAddIncident] = useState(false);
+  const [showAddLog, setShowAddLog] = useState(false);
+  const [isGeneratingLogs, setIsGeneratingLogs] = useState(false);
   const { user } = useAuth();
 
-  const handleRaceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const raceId = parseInt(e.target.value);
-    const newRace = allRaces.find(r => r.id === raceId);
-    if (newRace) {
-      setSelectedRace(newRace);
-      setOpenIncidentId(null);
-      setIsAddingIncident(false);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const headers = { 'Authorization': `Bearer ${token}` };
+
+      // Fetch current race
+      const raceRes = await fetch('http://localhost:3002/api/races/active', { headers });
+      if (raceRes.ok) {
+        const race = await raceRes.json();
+        setCurrentRace(race);
+        
+        // Fetch race logs and incidents
+        if (race) {
+          const [logsRes, incidentsRes] = await Promise.all([
+            fetch(`http://localhost:3002/api/races/${race.id}/logs`, { headers }),
+            fetch(`http://localhost:3002/api/races/${race.id}/incidents`, { headers })
+          ]);
+          
+          if (logsRes.ok) setRaceLogs(await logsRes.json());
+          if (incidentsRes.ok) setIncidents(await incidentsRes.json());
+        }
+      }
+
+      // Fetch race history
+      const historyRes = await fetch('http://localhost:3002/api/steward/history', { headers });
+      if (historyRes.ok) {
+        setRaceHistory(await historyRes.json());
+      }
+
+    } catch (error) {
+      console.error('Fetch data error:', error);
+      toast.error('Failed to fetch data');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleAddIncident = (newIncidentData: Omit<RaceIncident, 'id'>) => {
-    const newIncident: RaceIncident = {
-      ...newIncidentData,
-      id: Math.max(...selectedRace.incidents.map(i => i.id)) + 1,
-    };
-
-    setSelectedRace(prevRace => ({
-      ...prevRace,
-      incidents: [newIncident, ...prevRace.incidents],
-    }));
-
-    setIsAddingIncident(false);
-  };
-
-  const handleApplyPenalty = (incidentId: number, penaltyValue: string) => {
-     setSelectedRace(prevRace => {
-      const raceCopy = { ...prevRace };
-      const incident = raceCopy.incidents.find(i => i.id === incidentId);
-      if (!incident) return prevRace;
-
-      const driverIdToPenalize = incident.driver.id;
-      
-      const newResults = raceCopy.results.map(result => {
-        if (result.driver.id === driverIdToPenalize) {
-          // In a real app, you'd properly calculate time, for now we just append.
-          const existingPenalty = result.penalty === '0s' ? 0 : parseInt(result.penalty);
-          const newPenalty = existingPenalty + parseInt(penaltyValue);
-          return { ...result, penalty: `+${newPenalty}s` };
-        }
-        return result;
+  const handleGenerateLogs = async () => {
+    if (!currentRace) return;
+    
+    try {
+      setIsGeneratingLogs(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:3002/api/races/${currentRace.id}/generate-logs`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      return { ...raceCopy, results: newResults };
-    });
+      if (response.ok) {
+        const result = await response.json();
+        toast.success(`Generated ${result.count} race logs!`);
+        fetchData(); // Refresh data
+      } else {
+        toast.error('Failed to generate race logs');
+      }
+    } catch (error) {
+      console.error('Generate logs error:', error);
+      toast.error('Failed to generate race logs');
+    } finally {
+      setIsGeneratingLogs(false);
+    }
   };
 
-  const raceDrivers = useMemo(() => {
-    return Array.from(new Set(TEAMS.flatMap(t => t.drivers)));
-  }, []);
+  const handleAddIncident = async (data: { lap: number; description: string; driverId: number }) => {
+    if (!currentRace) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:3002/api/races/${currentRace.id}/incidents`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        toast.success('Incident added successfully!');
+        setShowAddIncident(false);
+        fetchData(); // Refresh data
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to add incident');
+      }
+    } catch (error) {
+      console.error('Add incident error:', error);
+      toast.error('Failed to add incident');
+    }
+  };
+
+  const handleAddLog = async (data: { lap: number; description: string; severity: string; driverId?: number; teamId?: number }) => {
+    if (!currentRace) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:3002/api/races/${currentRace.id}/logs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        toast.success('Race log added successfully!');
+        setShowAddLog(false);
+        fetchData(); // Refresh data
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to add race log');
+      }
+    } catch (error) {
+      console.error('Add log error:', error);
+      toast.error('Failed to add race log');
+    }
+  };
+
+  const handleAssignPenalty = async (incidentId: number, penaltyType: string, penaltyValue: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:3002/api/incidents/${incidentId}/penalties`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ penaltyType, penaltyValue })
+      });
+
+      if (response.ok) {
+        toast.success('Penalty assigned successfully!');
+        fetchData(); // Refresh data
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to assign penalty');
+      }
+    } catch (error) {
+      console.error('Assign penalty error:', error);
+      toast.error('Failed to assign penalty');
+    }
+  };
+
+  const handleApprovePenalty = async (assignmentId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:3002/api/penalties/${assignmentId}/approve`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        toast.success('Penalty approved successfully!');
+        fetchData(); // Refresh data
+      } else {
+        toast.error('Failed to approve penalty');
+      }
+    } catch (error) {
+      console.error('Approve penalty error:', error);
+      toast.error('Failed to approve penalty');
+    }
+  };
+
+  const SidebarButton: React.FC<{ viewName: string; label: string; icon?: string }> = ({ viewName, label, icon }) => (
+    <button
+      onClick={() => setActiveView(viewName as any)}
+      className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+        activeView === viewName
+          ? 'bg-yellow-500 text-black font-semibold'
+          : 'text-gray-300 hover:bg-gray-700/50'
+      }`}
+    >
+      {label}
+    </button>
+  );
+
+  const renderMainContent = () => {
+    if (activeView === 'history') {
+      return (
+        <div className="bg-[#161b22] p-6 rounded-lg border border-gray-700">
+          <h2 className="text-3xl font-bold mb-6">Race History</h2>
+          
+          {raceHistory.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 text-lg">No previous races found</p>
+              <p className="text-gray-500 text-sm mt-2">Races you've monitored will appear here</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {raceHistory.map(race => (
+                <div key={race.id} className="bg-gray-800 p-4 rounded-lg border border-gray-600">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="text-xl font-bold">{race.name}</h3>
+                      <p className="text-gray-400">{race.circuit.name} - {race.season.year}</p>
+                      <p className="text-sm text-gray-500">{new Date(race.date).toLocaleDateString()}</p>
+                    </div>
+                    <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm">
+                      {race.status}
+                    </span>
+                  </div>
+                  
+                  {race.incidents && race.incidents.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="font-semibold mb-2">Incidents Monitored:</h4>
+                      <div className="space-y-2">
+                        {race.incidents.map(incident => (
+                          <div key={incident.id} className="bg-gray-700 p-3 rounded">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium">Lap {incident.lap}: {incident.driver.name}</p>
+                                <p className="text-sm text-gray-300">{incident.description}</p>
+                              </div>
+                              {incident.penalty && (
+                                <span className="bg-yellow-600 text-black px-2 py-1 rounded text-sm">
+                                  {incident.penalty.value}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Race Monitoring View
+    if (!currentRace) {
+      return (
+        <div className="bg-[#161b22] p-6 rounded-lg border border-gray-700">
+          <h2 className="text-3xl font-bold mb-6">Race Monitoring</h2>
+          <div className="text-center py-12">
+            <p className="text-gray-400 text-lg">No active race found</p>
+            <p className="text-gray-500 text-sm mt-2">Wait for an admin to create a race</p>
+          </div>
+        </div>
+      );
+    }
+
+    const allDrivers = currentRace.participations.flatMap(p => p.team.drivers);
+
+    return (
+      <div className="bg-[#161b22] p-6 rounded-lg border border-gray-700">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-3xl font-bold">Race Monitoring</h2>
+            <p className="text-gray-400 mt-1">{currentRace.name} - {currentRace.circuit.name}</p>
+            <p className="text-sm text-gray-500">{new Date(currentRace.date).toLocaleDateString()}</p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handleGenerateLogs}
+              disabled={isGeneratingLogs}
+              className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-colors text-base"
+            >
+              {isGeneratingLogs ? 'Generating...' : 'Generate Race Logs'}
+            </button>
+            <button
+              onClick={() => setShowAddLog(true)}
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-colors text-base"
+            >
+              Add Log Entry
+            </button>
+            <button
+              onClick={() => setShowAddIncident(true)}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition-colors text-base"
+            >
+              Add Incident
+            </button>
+          </div>
+        </div>
+
+        {/* Race Logs */}
+        <div className="mb-8">
+          <h3 className="text-xl font-bold mb-4">Race Logs</h3>
+          <div className="bg-gray-800 rounded-lg p-4 max-h-96 overflow-y-auto">
+            {raceLogs.length === 0 ? (
+              <p className="text-gray-400 text-center py-8">No race logs yet. Generate some logs or add manually.</p>
+            ) : (
+              <div className="space-y-2">
+                {raceLogs.map(log => (
+                  <div key={log.id} className={`p-3 rounded border-l-4 ${
+                    log.severity === 'CRITICAL' ? 'border-red-500 bg-red-900/20' :
+                    log.severity === 'WARNING' ? 'border-yellow-500 bg-yellow-900/20' :
+                    'border-blue-500 bg-blue-900/20'
+                  }`}>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium">Lap {log.lap}</p>
+                        <p className="text-sm text-gray-300">{log.description}</p>
+                        {log.driver && (
+                          <p className="text-xs text-gray-400 mt-1">Driver: {log.driver.name} (#{log.driver.number})</p>
+                        )}
+                      </div>
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        log.severity === 'CRITICAL' ? 'bg-red-600 text-white' :
+                        log.severity === 'WARNING' ? 'bg-yellow-600 text-black' :
+                        'bg-blue-600 text-white'
+                      }`}>
+                        {log.severity}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Incidents */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">Incidents</h3>
+          {incidents.length === 0 ? (
+            <div className="bg-gray-800 rounded-lg p-8 text-center">
+              <p className="text-gray-400">No incidents reported yet</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {incidents.map(incident => (
+                <div key={incident.id} className="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h4 className="font-bold">Lap {incident.lap}: {incident.driver.name}</h4>
+                      <p className="text-gray-300">{incident.description}</p>
+                      <p className="text-sm text-gray-400 mt-1">
+                        Driver #{incident.driver.number} - {incident.driver.team.name}
+                      </p>
+                    </div>
+                    {incident.penalty ? (
+                      <span className="bg-yellow-600 text-black px-3 py-1 rounded-full text-sm font-semibold">
+                        {incident.penalty.value}
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          const penaltyType = prompt('Penalty Type (TimePenalty/GridPenalty/Warning/NoFurtherAction):');
+                          const penaltyValue = prompt('Penalty Value (e.g., "5 seconds"):');
+                          if (penaltyType && penaltyValue) {
+                            handleAssignPenalty(incident.id, penaltyType, penaltyValue);
+                          }
+                        }}
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Assign Penalty
+                      </button>
+                    )}
+                  </div>
+                  
+                  {incident.penaltyAssignments && incident.penaltyAssignments.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-gray-600">
+                      <h5 className="font-semibold mb-2">Penalty Assignments:</h5>
+                      {incident.penaltyAssignments.map(assignment => (
+                        <div key={assignment.id} className="flex justify-between items-center bg-gray-700 p-2 rounded">
+                          <div>
+                            <p className="text-sm">Assigned by: {assignment.steward.username}</p>
+                            <p className="text-xs text-gray-400">Status: {assignment.status}</p>
+                          </div>
+                          {assignment.status === 'PENDING' && (
+                            <button
+                              onClick={() => handleApprovePenalty(assignment.id)}
+                              className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-sm"
+                            >
+                              Approve
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0d1117] p-4 sm:p-8 text-gray-200 pt-28 font-inter">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-gray-400">Loading steward dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0d1117] p-4 sm:p-8 text-gray-200 pt-28 font-inter">
       <div className="max-w-7xl mx-auto">
-
-        <header className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-5xl font-black uppercase tracking-wide">Steward Dashboard</h1>
-          </div>
-          <div className="flex items-center gap-4">
-             <select onChange={handleRaceChange} value={selectedRace.id} className="bg-[#161b22] border border-gray-700 rounded-md px-3 py-2 font-semibold text-base">
-                {allRaces.map(race => (
-                  <option key={race.id} value={race.id}>{race.name}</option>
-                ))}
-             </select>
-            <div className="bg-yellow-500 text-black text-base font-bold px-4 py-2 rounded-full shadow-lg whitespace-nowrap">
-              Race Status: {selectedRace.id === LIVE_RACE_DATA.id ? 'Pending' : 'Finished'}
-            </div>
-          </div>
-        </header>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Live Race Standings */}
-          <div className="lg:col-span-2 bg-[#161b22] p-6 rounded-lg border border-gray-700">
-            <h2 className="text-3xl font-bold mb-4">Race Standings</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-gray-600">
-                    <th className="p-3 text-base font-semibold uppercase text-gray-400">Pos</th>
-                    <th className="p-3 text-base font-semibold uppercase text-gray-400">Driver</th>
-                    <th className="p-3 text-base font-semibold uppercase text-gray-400">Team</th>
-                    <th className="p-3 text-base font-semibold uppercase text-gray-400">Total Time</th>
-                    <th className="p-3 text-base font-semibold uppercase text-gray-400">Penalty</th>
-                    <th className="p-3 text-base font-semibold uppercase text-gray-400">Fastest Lap</th>
-                  </tr>
-                </thead>
-                <tbody className="text-base">
-                  {selectedRace.results.map((result: RaceResult) => (
-                    <tr key={result.position} className="border-b border-gray-700/50">
-                      <td className="p-3 font-bold text-lg">{result.position}</td>
-                      <td className="p-3 font-semibold">{result.driver.name}</td>
-                      <td className="p-3 text-gray-400">{result.team.name}</td>
-                      <td className="p-3 font-mono">{result.time}</td>
-                      <td className={`p-3 font-mono font-bold ${result.penalty !== '0s' ? 'text-red-500' : ''}`}>{result.penalty}</td>
-                      <td className="p-3 font-mono">{result.fastestLap}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Incident Review */}
-          <div className="bg-[#161b22] p-6 rounded-lg border border-gray-700">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-3xl font-bold">Incident Review</h2>
-              <button onClick={() => setIsAddingIncident(prev => !prev)} className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-3 rounded transition-colors text-base">
-                <PlusIcon className="w-4 h-4" />
-                <span>{isAddingIncident ? 'Cancel' : 'Add Incident'}</span>
-              </button>
-            </div>
-             {isAddingIncident && <AddIncidentForm drivers={raceDrivers} onAddIncident={handleAddIncident} onCancel={() => setIsAddingIncident(false)} />}
-            <div className="space-y-3">
-              {selectedRace.incidents.map((incident) => (
-                 <IncidentReviewCard 
-                  key={incident.id} 
-                  incident={incident}
-                  isOpen={openIncidentId === incident.id}
-                  onToggle={() => setOpenIncidentId(openIncidentId === incident.id ? null : incident.id)}
-                  onApplyPenalty={handleApplyPenalty}
-                 />
-              ))}
-            </div>
-          </div>
+        <h1 className="text-5xl font-black mb-8 uppercase tracking-wide">Steward Dashboard</h1>
+        
+        <div className="flex flex-col md:flex-row gap-8 md:items-start">
+          <aside className="md:w-1/3 lg:w-1/4 bg-[#161b22] p-4 rounded-lg border border-gray-700 self-stretch">
+            <nav className="flex flex-col gap-2">
+              <SidebarButton viewName="monitoring" label="Race Monitoring" />
+              <SidebarButton viewName="history" label="Race History" />
+            </nav>
+          </aside>
+          <main className="flex-1">
+            {renderMainContent()}
+          </main>
         </div>
 
-        <div className="mt-8 flex justify-end">
-          <button className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-colors text-xl">
-            Finalize & Publish Results
-          </button>
-        </div>
+        {/* Add Incident Modal */}
+        {showAddIncident && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+              <h3 className="text-xl font-bold mb-4">Add Incident</h3>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target as HTMLFormElement);
+                const data = {
+                  lap: parseInt(formData.get('lap') as string),
+                  description: formData.get('description') as string,
+                  driverId: parseInt(formData.get('driverId') as string)
+                };
+                handleAddIncident(data);
+              }}>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Driver</label>
+                    <select name="driverId" required className="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                      <option value="">Select driver</option>
+                      {currentRace?.participations.flatMap(p => p.team.drivers).map(driver => (
+                        <option key={driver.id} value={driver.id}>
+                          {driver.name} (#{driver.number}) - {driver.team.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Lap</label>
+                    <input type="number" name="lap" required className="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Description</label>
+                    <textarea name="description" required rows={3} className="w-full p-2 rounded bg-gray-700 border border-gray-600"></textarea>
+                  </div>
+                </div>
+                <div className="flex gap-3 mt-6">
+                  <button type="submit" className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex-1">
+                    Add Incident
+                  </button>
+                  <button type="button" onClick={() => setShowAddIncident(false)} className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Add Log Modal */}
+        {showAddLog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+              <h3 className="text-xl font-bold mb-4">Add Race Log</h3>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target as HTMLFormElement);
+                const data = {
+                  lap: parseInt(formData.get('lap') as string),
+                  description: formData.get('description') as string,
+                  severity: formData.get('severity') as string,
+                  driverId: formData.get('driverId') ? parseInt(formData.get('driverId') as string) : undefined,
+                  teamId: formData.get('teamId') ? parseInt(formData.get('teamId') as string) : undefined
+                };
+                handleAddLog(data);
+              }}>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Lap</label>
+                    <input type="number" name="lap" required className="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Description</label>
+                    <textarea name="description" required rows={3} className="w-full p-2 rounded bg-gray-700 border border-gray-600"></textarea>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Severity</label>
+                    <select name="severity" required className="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                      <option value="INFO">Info</option>
+                      <option value="WARNING">Warning</option>
+                      <option value="CRITICAL">Critical</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Driver (Optional)</label>
+                    <select name="driverId" className="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                      <option value="">Select driver</option>
+                      {currentRace?.participations.flatMap(p => p.team.drivers).map(driver => (
+                        <option key={driver.id} value={driver.id}>
+                          {driver.name} (#{driver.number}) - {driver.team.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="flex gap-3 mt-6">
+                  <button type="submit" className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex-1">
+                    Add Log
+                  </button>
+                  <button type="button" onClick={() => setShowAddLog(false)} className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -33,7 +33,7 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ onClose, onSuccess })
       
       console.log('Creating team with data:', formData);
       
-      const response = await fetch('http://localhost:4000/api/teams', {
+      const response = await fetch('http://localhost:3002/api/teams', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
