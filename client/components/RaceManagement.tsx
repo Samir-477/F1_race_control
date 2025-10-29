@@ -151,21 +151,56 @@ const RaceManagement: React.FC = () => {
         </button>
       </div>
 
-      {/* Race Filter Dropdown */}
-      <div className="mb-6">
-        <label className="block text-base font-medium text-gray-300 mb-2">Select Race to View Participants:</label>
-        <select 
-          onChange={(e) => handleRaceSelect(parseInt(e.target.value))}
-          className="w-full max-w-md p-2 rounded bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition text-base"
-        >
-          <option value="">Choose a race...</option>
-          {races.map(race => (
-            <option key={race.id} value={race.id}>
-              {race.name} - {race.circuit.name} ({race.season.year})
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Existing Races Table */}
+      {races.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-xl font-bold mb-4">Existing Races</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Race Name</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Circuit</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Date</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Season</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Status</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Teams</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {races.map(race => (
+                  <tr key={race.id} className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
+                    <td className="py-4 px-4 text-white font-medium">{race.name}</td>
+                    <td className="py-4 px-4 text-gray-300">{race.circuit.name}</td>
+                    <td className="py-4 px-4 text-gray-300">{new Date(race.date).toLocaleDateString()}</td>
+                    <td className="py-4 px-4 text-gray-300">{race.season.year}</td>
+                    <td className="py-4 px-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        race.status === 'COMPLETED' ? 'bg-green-600 text-white' :
+                        race.status === 'IN_PROGRESS' ? 'bg-yellow-600 text-black' :
+                        race.status === 'SCHEDULED' ? 'bg-blue-600 text-white' :
+                        'bg-gray-600 text-white'
+                      }`}>
+                        {race.status || 'SCHEDULED'}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 text-gray-300">{race.participations.length} teams</td>
+                    <td className="py-4 px-4">
+                      <button
+                        onClick={() => handleRaceSelect(race.id)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+                      >
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Create Race Form */}
       {showCreateForm && (

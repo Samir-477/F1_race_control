@@ -130,6 +130,115 @@ router.get('/races/completed', async (req, res) => {
   }
 });
 
+// Get latest completed race with full standings (for landing page)
+router.get('/races/latest-result', async (req, res) => {
+  try {
+    const latestRace = await prisma.race.findFirst({
+      where: { 
+        status: 'COMPLETED',
+        isReviewed: true  // Only show reviewed races
+      },
+      include: {
+        circuit: true,
+        season: true,
+        participations: {
+          include: {
+            team: {
+              include: {
+                drivers: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { date: 'desc' }
+    });
+
+    if (!latestRace) {
+      return res.json(null);
+    }
+
+    // Get all drivers from participating teams
+    const drivers = latestRace.participations.flatMap(p => 
+      p.team.drivers.map(d => ({
+        ...d,
+        team: p.team,
+      }))
+    );
+
+    // Re-simulate to get standings
+    const { simulateRace } = await import('../utils/raceSimulator.js');
+    const raceResults = simulateRace(drivers, latestRace.circuit);
+
+    // Get incidents and penalties for each driver
+    const incidents = await prisma.raceIncident.findMany({
+      where: { raceId: latestRace.id },
+      include: {
+        penalty: true,
+        driver: true,
+      },
+    });
+
+    // Apply penalties to standings
+    const standingsWithPenalties = raceResults.standings.map(standing => {
+      const driverIncidents = incidents.filter(inc => inc.driverId === standing.driverId);
+      const totalPenalty = driverIncidents.reduce((sum, inc) => {
+        if (inc.penalty && inc.penalty.type === 'TimePenalty') {
+          const penaltySeconds = parseFloat(inc.penalty.value.replace(/[^0-9.]/g, ''));
+          return sum + penaltySeconds;
+        }
+        return sum;
+      }, 0);
+
+      return {
+        ...standing,
+        penalty: totalPenalty > 0 ? `${totalPenalty}s` : '0s',
+        penaltySeconds: totalPenalty,
+      };
+    });
+
+    // Re-sort by total time + penalties
+    standingsWithPenalties.sort((a, b) => {
+      const aTime = parseFloat(a.totalTime.split(':')[0]) * 60 + parseFloat(a.totalTime.split(':')[1]) + a.penaltySeconds;
+      const bTime = parseFloat(b.totalTime.split(':')[0]) * 60 + parseFloat(b.totalTime.split(':')[1]) + b.penaltySeconds;
+      return aTime - bTime;
+    });
+
+    // Update positions and calculate points
+    const finalStandings = standingsWithPenalties.map((standing, index) => {
+      const position = index + 1;
+      // F1 points system: 25, 18, 15, 12, 10, 8, 6, 4, 2, 1
+      const pointsMap = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+      const points = position <= 10 ? pointsMap[position - 1] : 0;
+
+      return {
+        position,
+        driver: standing.driverName,
+        team: standing.teamName,
+        time: position === 1 ? standing.totalTime : standing.gap,
+        points,
+        penalty: standing.penalty
+      };
+    });
+
+    const result = {
+      id: latestRace.id,
+      name: latestRace.name,
+      circuit: latestRace.circuit.name,
+      circuitLocation: latestRace.circuit.location,
+      circuitCountry: latestRace.circuit.country,
+      date: latestRace.date,
+      season: latestRace.season.year,
+      standings: finalStandings
+    };
+
+    res.json(result);
+  } catch (error) {
+    console.error('Get latest race result error:', error);
+    res.status(500).json({ error: 'Failed to fetch latest race result' });
+  }
+});
+
 // Create a new race (Admin only)
 router.post('/races', authMiddleware, async (req, res) => {
   if (req.user.role !== 'ADMIN') {
@@ -321,12 +430,18 @@ router.delete('/races/:id', authMiddleware, async (req, res) => {
 
 // ===== RACE MONITORING ENDPOINTS =====
 
-// Get active/latest race for stewards
+// Get active/latest race for stewards (monitoring section)
 router.get('/races/active', authMiddleware, async (req, res) => {
   try {
     const race = await prisma.race.findFirst({
       where: {
-        status: { in: ['SCHEDULED', 'IN_PROGRESS'] }
+        OR: [
+          { status: { in: ['SCHEDULED', 'IN_PROGRESS'] } },
+          { 
+            status: 'COMPLETED',
+            isReviewed: false  // Include completed but not yet reviewed races
+          }
+        ]
       },
       include: {
         circuit: true,
@@ -762,5 +877,63 @@ router.get('/races/:raceId/race-incidents', authMiddleware, raceController.getRa
 
 // Finalize race and publish results
 router.post('/races/:raceId/finalize', authMiddleware, raceController.finalizeRace);
+
+// Review/Accept race (Steward only)
+router.post('/races/:raceId/review', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== 'STEWARD' && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Only stewards can review races' });
+    }
+
+    const raceId = parseInt(req.params.raceId);
+    
+    const race = await prisma.race.findUnique({
+      where: { id: raceId },
+      include: {
+        circuit: true,
+        season: true
+      }
+    });
+
+    if (!race) {
+      return res.status(404).json({ error: 'Race not found' });
+    }
+
+    if (race.status !== 'COMPLETED') {
+      return res.status(400).json({ error: 'Only completed races can be reviewed' });
+    }
+
+    if (race.isReviewed) {
+      return res.status(400).json({ error: 'Race has already been reviewed' });
+    }
+
+    const updatedRace = await prisma.race.update({
+      where: { id: raceId },
+      data: {
+        isReviewed: true,
+        reviewedById: req.user.id,
+        reviewedAt: new Date()
+      },
+      include: {
+        circuit: true,
+        season: true,
+        reviewedBy: {
+          select: {
+            id: true,
+            username: true
+          }
+        }
+      }
+    });
+
+    res.json({
+      message: 'Race reviewed successfully',
+      race: updatedRace
+    });
+  } catch (error) {
+    console.error('Review race error:', error);
+    res.status(500).json({ error: 'Failed to review race' });
+  }
+});
 
 export default router;

@@ -408,9 +408,10 @@ const AdminDashboard: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#0d1117] p-4 sm:p-8 text-gray-200 pt-28 font-inter">
+    <div className="min-h-screen bg-[#0d1117] px-4 sm:px-8 pb-8 text-gray-200 font-inter">
+      <div className="h-28"></div> {/* Spacer for fixed navbar */}
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-5xl font-black mb-8 uppercase tracking-wide">Admin Dashboard</h1>
+        <h1 className="text-5xl font-black mb-12 uppercase tracking-wide">Admin Dashboard</h1>
         
         <div className="flex flex-col md:flex-row gap-8 md:items-start">
           <aside className="md:w-1/3 lg:w-1/4 bg-[#161b22] p-4 rounded-lg border border-gray-700 self-stretch">

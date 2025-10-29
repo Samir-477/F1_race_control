@@ -10,6 +10,7 @@ interface Race {
   name: string;
   date: string;
   status: string;
+  isReviewed?: boolean;
   circuit: {
     name: string;
     laps: number;
@@ -23,14 +24,16 @@ interface RaceMonitoringViewProps {
   race: Race;
   onClose: () => void;
   onFinalize: () => void;
+  onReview?: () => void;
 }
 
-const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, onFinalize }) => {
+const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, onFinalize, onReview }) => {
   const [standings, setStandings] = useState<any[]>([]);
   const [incidents, setIncidents] = useState<any[]>([]);
   const [drivers, setDrivers] = useState<any[]>([]);
   const [isAddIncidentModalOpen, setIsAddIncidentModalOpen] = useState(false);
   const [isConfirmFinalizeOpen, setIsConfirmFinalizeOpen] = useState(false);
+  const [isConfirmReviewOpen, setIsConfirmReviewOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [hasLogs, setHasLogs] = useState(false);
 
@@ -165,6 +168,33 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
     }
   };
 
+  const handleReviewRace = async () => {
+    const token = localStorage.getItem('token');
+    const loadingToast = toast.loading('Reviewing race...');
+    
+    try {
+      const response = await fetch(`http://localhost:3002/api/races/${race.id}/review`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        toast.success('Race reviewed and accepted successfully!', { id: loadingToast });
+        if (onReview) onReview();
+        onClose();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to review race', { id: loadingToast });
+      }
+    } catch (error) {
+      console.error('Error reviewing race:', error);
+      toast.error('Failed to review race', { id: loadingToast });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="fixed inset-0 z-50 bg-gray-900 flex items-center justify-center">
@@ -203,6 +233,19 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
               >
                 Finalize & Publish Results
               </button>
+            )}
+            {race.status === 'COMPLETED' && !race.isReviewed && (
+              <button
+                onClick={() => setIsConfirmReviewOpen(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+              >
+                Review & Accept Race
+              </button>
+            )}
+            {race.status === 'COMPLETED' && race.isReviewed && (
+              <div className="bg-green-900/30 border border-green-600 text-green-400 px-4 py-2 rounded-lg font-semibold">
+                ✓ Reviewed & Published
+              </div>
             )}
             <button
               onClick={onClose}
@@ -291,6 +334,21 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
           handleFinalizeRace();
         }}
         onCancel={() => setIsConfirmFinalizeOpen(false)}
+      />
+
+      {/* Confirmation Modal for Review */}
+      <ConfirmationModal
+        isOpen={isConfirmReviewOpen}
+        title="Review & Accept Race?"
+        message="This will mark the race as reviewed and make it visible on the landing page. Are you sure all incidents have been properly handled?"
+        confirmText="Accept & Publish"
+        cancelText="Cancel"
+        type="success"
+        onConfirm={() => {
+          setIsConfirmReviewOpen(false);
+          handleReviewRace();
+        }}
+        onCancel={() => setIsConfirmReviewOpen(false)}
       />
     </div>
   );

@@ -8,7 +8,7 @@ interface ConfirmationModalProps {
   cancelText?: string;
   onConfirm: () => void;
   onCancel: () => void;
-  type?: 'danger' | 'warning' | 'info';
+  type?: 'danger' | 'warning' | 'info' | 'success';
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -45,6 +45,20 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           iconBg: 'bg-blue-900/30',
           iconBorder: 'border-blue-600',
           confirmBtn: 'bg-blue-600 hover:bg-blue-700',
+        };
+      case 'success':
+        return {
+          icon: '✓',
+          iconBg: 'bg-green-900/30',
+          iconBorder: 'border-green-600',
+          confirmBtn: 'bg-green-600 hover:bg-green-700',
+        };
+      default:
+        return {
+          icon: '⚡',
+          iconBg: 'bg-yellow-900/30',
+          iconBorder: 'border-yellow-600',
+          confirmBtn: 'bg-yellow-600 hover:bg-yellow-700',
         };
     }
   };

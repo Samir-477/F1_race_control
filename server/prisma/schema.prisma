@@ -56,6 +56,7 @@ model User {
   // Relations
   penaltyAssignments PenaltyAssignment[]
   approvedPenalties  PenaltyAssignment[] @relation("PenaltyApprover")
+  reviewedRaces      Race[]              @relation("RaceReviewer")
 }
 
 model Team {
@@ -171,6 +172,12 @@ model Race {
   status    RaceStatus @default(SCHEDULED)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+
+  // Steward review tracking
+  reviewedBy    User?     @relation("RaceReviewer", fields: [reviewedById], references: [id])
+  reviewedById  Int?
+  reviewedAt    DateTime?
+  isReviewed    Boolean   @default(false)
 
   // Relations
   circuit   Circuit @relation(fields: [circuitId], references: [id])

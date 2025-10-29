@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 
-interface CompletedRace {
+interface RaceStanding {
+  position: number;
+  driver: string;
+  team: string;
+  time: string;
+  points: number;
+  penalty: string;
+}
+
+interface LatestRaceResult {
   id: number;
   name: string;
   circuit: string;
@@ -8,47 +17,53 @@ interface CompletedRace {
   circuitCountry: string;
   date: string;
   season: number;
-  topThree: Array<{
-    position: number;
-    driver: string;
-    team: string;
-    time: string;
-    penalty: string;
-  }>;
+  standings: RaceStanding[];
 }
 
 const RaceResults: React.FC = () => {
-  const [completedRaces, setCompletedRaces] = useState<CompletedRace[]>([]);
+  const [latestRace, setLatestRace] = useState<LatestRaceResult | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCompletedRaces();
+    fetchLatestRace();
     
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchCompletedRaces, 30000);
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(fetchLatestRace, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  const fetchCompletedRaces = async () => {
+  const fetchLatestRace = async () => {
     try {
-      const response = await fetch('http://localhost:3002/api/races/completed');
+      const response = await fetch('http://localhost:3002/api/races/latest-result', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
-        setCompletedRaces(data);
+        console.log('Fetched latest race:', data); // Debug log
+        setLatestRace(data);
+      } else {
+        console.log('No race data available');
+        setLatestRace(null);
       }
     } catch (error) {
-      console.error('Error fetching completed races:', error);
+      console.error('Error fetching latest race:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getPodiumEmoji = (position: number) => {
+  const getPositionColor = (position: number): string => {
     switch (position) {
-      case 1: return '🥇';
-      case 2: return '🥈';
-      case 3: return '🥉';
-      default: return '';
+      case 1: return 'border-l-red-500';
+      case 2: return 'border-l-orange-500';
+      case 3: return 'border-l-cyan-400';
+      case 4: return 'border-l-yellow-500';
+      case 5: return 'border-l-green-500';
+      case 6: return 'border-l-blue-500';
+      default: return 'border-l-gray-600';
     }
   };
 
@@ -63,94 +78,80 @@ const RaceResults: React.FC = () => {
     );
   }
 
-  return (
-    <section id="race-results" className="py-20 px-4 bg-gray-900">
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-5xl font-black text-center mb-12 uppercase tracking-widest">Latest Race Results</h2>
-        
-        {completedRaces.length === 0 ? (
+  if (!latestRace) {
+    return (
+      <section id="race-results" className="py-20 px-4 bg-gray-900">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-5xl font-black text-center mb-12 uppercase tracking-widest">Latest Race Results</h2>
           <div className="text-center py-16">
             <div className="mb-6">
               <svg className="w-24 h-24 text-gray-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-gray-400 mb-2">No Results Yet</h3>
-            <p className="text-gray-500">Check back after races are completed and finalized by stewards!</p>
+            <h3 className="text-2xl font-bold text-gray-400 mb-2">No Reviewed Results Available</h3>
+            <p className="text-gray-500">Check back after races are completed and reviewed by stewards!</p>
           </div>
-        ) : (
-          <div className="space-y-12">
-            {completedRaces.map(race => (
-              <div key={race.id} className="bg-gray-800 rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
-                {/* Race Header */}
-                <div className="bg-gradient-to-r from-red-600 to-red-800 px-6 py-4">
-                  <h3 className="text-2xl font-bold uppercase text-white mb-1">{race.name}</h3>
-                  <p className="text-red-100">
-                    {race.circuit}, {race.circuitLocation} • {new Date(race.date).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
-                  </p>
-                </div>
+        </div>
+      </section>
+    );
+  }
 
-                {/* Results Table */}
-                {race.topThree.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b-2 border-red-500 bg-gray-900">
-                          <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-400">Position</th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-400">Driver</th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-400">Team</th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-400">Time</th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-400">Penalty</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {race.topThree.map((result, index) => (
-                          <tr 
-                            key={result.position} 
-                            className={`border-b border-gray-700 hover:bg-gray-700/50 transition-colors ${
-                              index === 0 ? 'bg-yellow-900/10' : ''
-                            }`}
-                          >
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                <span className="text-2xl">{getPodiumEmoji(result.position)}</span>
-                                <span className="text-xl font-bold text-white">{result.position}</span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className="font-bold text-lg text-white">{result.driver}</span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className="text-gray-300">{result.team}</span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className="font-mono text-white font-semibold">{result.time}</span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={`font-mono font-bold ${
-                                result.penalty !== '0s' ? 'text-red-400' : 'text-gray-500'
-                              }`}>
-                                {result.penalty !== '0s' ? `+${result.penalty}` : '—'}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="px-6 py-8 text-center">
-                    <p className="text-gray-500">Results not available</p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+  return (
+    <section id="race-results" className="py-20 px-4 bg-gray-900">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-5xl font-black text-center mb-12 uppercase tracking-widest">Latest Race Results</h2>
+        
+        {/* Race Header */}
+        <div className="bg-gradient-to-r from-red-600 to-red-800 px-8 py-6 rounded-t-lg">
+          <h3 className="text-3xl font-bold uppercase text-white mb-2">{latestRace.name}</h3>
+          <p className="text-red-100 text-lg">
+            {latestRace.circuit}, {latestRace.circuitCountry} - {new Date(latestRace.date).toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: '2-digit', 
+              day: '2-digit' 
+            })}
+          </p>
+        </div>
+
+        {/* Results Table */}
+        <div className="bg-gray-800 rounded-b-lg shadow-2xl overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-900 border-b border-gray-700">
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-400">Pos</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-400">Driver</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-400">Team</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-400">Time</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold uppercase tracking-wider text-gray-400">Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              {latestRace.standings.map((standing) => (
+                <tr 
+                  key={standing.position} 
+                  className={`border-b border-gray-700 hover:bg-gray-700/30 transition-colors border-l-4 ${getPositionColor(standing.position)}`}
+                >
+                  <td className="px-6 py-4">
+                    <span className="text-xl font-bold text-white">{standing.position}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="font-bold text-lg text-white">{standing.driver}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-gray-300">{standing.team}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="font-mono text-white">{standing.time}</span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <span className="text-red-500 font-bold text-lg">{standing.points}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   );

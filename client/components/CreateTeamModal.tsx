@@ -14,7 +14,8 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ onClose, onSuccess })
     description: '',
     base: '',
     teamChief: '',
-    color: '#FF0000'
+    color: '#FF0000',
+    sponsorNames: [''] // Array to hold sponsor names
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -24,6 +25,21 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ onClose, onSuccess })
     });
   };
 
+  const handleSponsorChange = (index: number, value: string) => {
+    const newSponsorNames = [...formData.sponsorNames];
+    newSponsorNames[index] = value;
+    setFormData({ ...formData, sponsorNames: newSponsorNames });
+  };
+
+  const addSponsorField = () => {
+    setFormData({ ...formData, sponsorNames: [...formData.sponsorNames, ''] });
+  };
+
+  const removeSponsorField = (index: number) => {
+    const newSponsorNames = formData.sponsorNames.filter((_, i) => i !== index);
+    setFormData({ ...formData, sponsorNames: newSponsorNames });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -31,7 +47,13 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ onClose, onSuccess })
     try {
       const token = localStorage.getItem('token');
       
-      console.log('Creating team with data:', formData);
+      // Filter out empty sponsor names
+      const filteredData = {
+        ...formData,
+        sponsorNames: formData.sponsorNames.filter(name => name.trim() !== '')
+      };
+      
+      console.log('Creating team with data:', filteredData);
       
       const response = await fetch('http://localhost:3002/api/teams', {
         method: 'POST',
@@ -39,7 +61,7 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ onClose, onSuccess })
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(filteredData)
       });
 
       if (!response.ok) {
@@ -172,6 +194,39 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ onClose, onSuccess })
               />
             </div>
             <p className="text-xs text-gray-400 mt-1">Select a color or enter hex code</p>
+          </div>
+
+          <div>
+            <label className="block text-gray-300 text-sm font-bold mb-2">
+              Sponsors (Optional)
+            </label>
+            {formData.sponsorNames.map((sponsor, index) => (
+              <div key={index} className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={sponsor}
+                  onChange={(e) => handleSponsorChange(index, e.target.value)}
+                  placeholder="e.g., Red Bull, Oracle"
+                  className="flex-1 bg-gray-700 border border-gray-600 text-white rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                />
+                {formData.sponsorNames.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeSponsorField(index)}
+                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition-colors"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addSponsorField}
+              className="text-yellow-500 hover:text-yellow-400 text-sm font-semibold mt-1"
+            >
+              + Add Another Sponsor
+            </button>
           </div>
 
           <div className="flex gap-4 pt-4">

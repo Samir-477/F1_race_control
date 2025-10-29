@@ -54,6 +54,7 @@ interface Race {
   name: string;
   date: string;
   status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  isReviewed?: boolean;
   circuit: Circuit;
   season: Season;
   participations: Array<{
@@ -142,6 +143,9 @@ const StewardDashboard: React.FC = () => {
           if (logsRes.ok) setRaceLogs(await logsRes.json());
           if (incidentsRes.ok) setIncidents(await incidentsRes.json());
         }
+      } else if (raceRes.status === 404) {
+        // No active race found - this is okay
+        setCurrentRace(null);
       }
 
       // Fetch race history
@@ -300,54 +304,62 @@ const StewardDashboard: React.FC = () => {
 
   const renderMainContent = () => {
     if (activeView === 'history') {
+      // Filter for completed races only
+      const completedRaces = allRaces.filter(race => race.status === 'COMPLETED');
+      
       return (
         <div className="bg-[#161b22] p-6 rounded-lg border border-gray-700">
           <h2 className="text-3xl font-bold mb-6">Race History</h2>
           
-          {raceHistory.length === 0 ? (
+          {completedRaces.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-400 text-lg">No previous races found</p>
-              <p className="text-gray-500 text-sm mt-2">Races you've monitored will appear here</p>
+              <p className="text-gray-400 text-lg">No completed races found</p>
+              <p className="text-gray-500 text-sm mt-2">Completed races will appear here</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {raceHistory.map(race => (
-                <div key={race.id} className="bg-gray-800 p-4 rounded-lg border border-gray-600">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="text-xl font-bold">{race.name}</h3>
-                      <p className="text-gray-400">{race.circuit.name} - {race.season.year}</p>
-                      <p className="text-sm text-gray-500">{new Date(race.date).toLocaleDateString()}</p>
-                    </div>
-                    <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm">
-                      {race.status}
-                    </span>
-                  </div>
-                  
-                  {race.incidents && race.incidents.length > 0 && (
-                    <div className="mt-4">
-                      <h4 className="font-semibold mb-2">Incidents Monitored:</h4>
-                      <div className="space-y-2">
-                        {race.incidents.map(incident => (
-                          <div key={incident.id} className="bg-gray-700 p-3 rounded">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <p className="font-medium">Lap {incident.lap}: {incident.driver.name}</p>
-                                <p className="text-sm text-gray-300">{incident.description}</p>
-                              </div>
-                              {incident.penalty && (
-                                <span className="bg-yellow-600 text-black px-2 py-1 rounded text-sm">
-                                  {incident.penalty.value}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-700">
+                    <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Race Name</th>
+                    <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Circuit</th>
+                    <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Date</th>
+                    <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Season</th>
+                    <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Status</th>
+                    <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {completedRaces.map(race => (
+                    <tr key={race.id} className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
+                      <td className="py-4 px-4 text-white font-medium">{race.name}</td>
+                      <td className="py-4 px-4 text-gray-300">{race.circuit.name}</td>
+                      <td className="py-4 px-4 text-gray-300">{new Date(race.date).toLocaleDateString()}</td>
+                      <td className="py-4 px-4 text-gray-300">{race.season.year}</td>
+                      <td className="py-4 px-4">
+                        <div className="flex gap-2 items-center">
+                          <span className="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                            {race.status}
+                          </span>
+                          {race.isReviewed && (
+                            <span className="bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                              ✓ Reviewed
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <button
+                          onClick={() => setSelectedRace(race)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
@@ -355,14 +367,19 @@ const StewardDashboard: React.FC = () => {
     }
 
     // Race Monitoring View
+    // Filter races for monitoring: exclude reviewed races
+    const monitoringRaces = allRaces.filter(race => 
+      race.status !== 'COMPLETED' || !race.isReviewed
+    );
+
     return (
       <div className="bg-[#161b22] p-6 rounded-lg border border-gray-700">
         <h2 className="text-3xl font-bold mb-6">Race Monitoring</h2>
         
-        {allRaces.length === 0 ? (
+        {monitoringRaces.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">No races found</p>
-            <p className="text-gray-500 text-sm mt-2">Wait for an admin to create a race</p>
+            <p className="text-gray-400 text-lg">No races to monitor</p>
+            <p className="text-gray-500 text-sm mt-2">All races have been reviewed or no races are available</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -377,7 +394,7 @@ const StewardDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {allRaces.map((race) => {
+                {monitoringRaces.map((race) => {
                   const hasLogs = race.logs && race.logs.length > 0;
                   return (
                     <tr
@@ -422,7 +439,8 @@ const StewardDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0d1117] p-4 sm:p-8 text-gray-200 pt-28 font-inter">
+      <div className="min-h-screen bg-[#0d1117] px-4 sm:px-8 pb-8 text-gray-200 font-inter">
+        <div className="h-24"></div> {/* Spacer for fixed navbar */}
         <div className="max-w-7xl mx-auto">
           <p className="text-gray-400">Loading steward dashboard...</p>
         </div>
@@ -440,14 +458,19 @@ const StewardDashboard: React.FC = () => {
           setSelectedRace(null);
           fetchData();
         }}
+        onReview={() => {
+          setSelectedRace(null);
+          fetchData();
+        }}
       />
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0d1117] p-4 sm:p-8 text-gray-200 pt-28 font-inter">
+    <div className="min-h-screen bg-[#0d1117] px-4 sm:px-8 pb-8 text-gray-200 font-inter">
+      <div className="h-28"></div> {/* Spacer for fixed navbar */}
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-5xl font-black mb-8 uppercase tracking-wide">Steward Dashboard</h1>
+        <h1 className="text-5xl font-black mb-12 uppercase tracking-wide">Steward Dashboard</h1>
         
         <div className="flex flex-col md:flex-row gap-8 md:items-start">
           <aside className="md:w-1/3 lg:w-1/4 bg-[#161b22] p-4 rounded-lg border border-gray-700 self-stretch">

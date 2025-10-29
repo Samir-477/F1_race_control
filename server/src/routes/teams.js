@@ -56,12 +56,42 @@ router.post('/', authMiddleware, async (req, res) => {
       teamChief,
       color,
       car,
-      sponsors
+      sponsors,
+      sponsorNames
     } = req.body;
 
     // Validate required fields
     if (!name || !fullName || !description || !base || !teamChief || !color) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Handle sponsor names - create or connect sponsors
+    let sponsorData = undefined;
+    if (sponsorNames && sponsorNames.length > 0) {
+      const sponsorConnections = [];
+      for (const sponsorName of sponsorNames) {
+        if (sponsorName.trim()) {
+          // Try to find existing sponsor or create new one
+          let sponsor = await prisma.sponsor.findUnique({
+            where: { name: sponsorName.trim() }
+          });
+          
+          if (!sponsor) {
+            sponsor = await prisma.sponsor.create({
+              data: { name: sponsorName.trim() }
+            });
+          }
+          
+          sponsorConnections.push({ id: sponsor.id });
+        }
+      }
+      
+      if (sponsorConnections.length > 0) {
+        sponsorData = { connect: sponsorConnections };
+      }
+    } else if (sponsors && sponsors.length > 0) {
+      // Legacy support for sponsor IDs
+      sponsorData = { connect: sponsors.map(id => ({ id })) };
     }
 
     const team = await prisma.team.create({
@@ -75,9 +105,7 @@ router.post('/', authMiddleware, async (req, res) => {
         car: car ? {
           create: car
         } : undefined,
-        sponsors: sponsors ? {
-          connect: sponsors.map(id => ({ id }))
-        } : undefined
+        sponsors: sponsorData
       },
       include: {
         drivers: true,
@@ -201,6 +229,18 @@ router.post('/:teamId/drivers', authMiddleware, async (req, res) => {
 
     const { name, number, nationality, imageUrl, podiums, points, worldChampionships } = req.body;
 
+    // Check if driver number already exists for this team
+    const existingDriverNumber = await prisma.driver.findFirst({
+      where: {
+        teamId,
+        number: parseInt(number)
+      }
+    });
+
+    if (existingDriverNumber) {
+      return res.status(400).json({ error: 'Driver number must be unique within the team. This number is already taken.' });
+    }
+
     const driver = await prisma.driver.create({
       data: {
         name,
@@ -217,6 +257,10 @@ router.post('/:teamId/drivers', authMiddleware, async (req, res) => {
     res.status(201).json(driver);
   } catch (error) {
     console.error('Create driver error:', error);
+    // Check for Prisma unique constraint error
+    if (error.code === 'P2002') {
+      return res.status(400).json({ error: 'Driver number must be unique within the team. This number is already taken.' });
+    }
     res.status(500).json({ error: error.message || 'Failed to create driver' });
   }
 });
