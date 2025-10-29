@@ -1,0 +1,34 @@
+{
+  "name": "f1-race-control-server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "prisma": "prisma",
+    "generate": "prisma generate --schema=prisma/schema.prisma",
+    "db:push": "prisma db push --schema=prisma/schema.prisma",
+    "db:migrate": "prisma migrate deploy --schema=prisma/schema.prisma",
+    "db:migrate:dev": "prisma migrate dev --schema=prisma/schema.prisma",
+    "db:reset": "prisma migrate reset --schema=prisma/schema.prisma",
+    "db:status": "prisma migrate status --schema=prisma/schema.prisma",
+    "db:studio": "prisma studio --schema=prisma/schema.prisma",
+    "start": "node src/index.js",
+    "dev": "node src/index.js",
+    "seed": "node prisma/seed.js",
+    "setup": "npm run generate && npm run db:migrate && npm run seed"
+  },
+  "devDependencies": {
+    "@prisma/client": "^6.18.0",
+    "mysql2": "^3.15.3",
+    "prisma": "^6.18.0"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1"
+  }
+}

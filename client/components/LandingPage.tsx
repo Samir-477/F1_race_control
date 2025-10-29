@@ -1,10 +1,9 @@
 import React, { useState, useRef } from 'react';
-import type { Team, Race, Driver } from '../types';
+import type { Team, Driver } from '../types';
 import RaceResults from './RaceResults';
 
 interface LandingPageProps {
   teams: Team[];
-  races: Race[];
 }
 
 interface TopPerformerCardProps {
@@ -29,7 +28,7 @@ const TopPerformerCard: React.FC<TopPerformerCardProps> = ({ driver, team, isVis
 };
 
 
-const LandingPage: React.FC<LandingPageProps> = ({ teams, races }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ teams }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
   const raceResultsRef = useRef<HTMLDivElement>(null);
@@ -62,10 +61,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ teams, races }) => {
           {teams.map((team, index) => (
             <div
               key={team.id}
-              className={`absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
-              style={{ backgroundImage: `url(${team.backgroundImageUrl})` }}
+              className={`absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+              style={{ backgroundImage: `url('${team.backgroundImageUrl}')` }}
+              aria-hidden={index === currentIndex ? 'false' : 'true'}
             >
-              <div className="absolute inset-0 bg-black/80"></div>
+              {/* lowered overlay opacity so background image is more visible */}
+              <div className="absolute inset-0 bg-black/30"></div>
             </div>
           ))}
         </div>
@@ -109,7 +110,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ teams, races }) => {
         </div>
       </div>
       <div ref={raceResultsRef}>
-        <RaceResults races={races} />
+        <RaceResults />
       </div>
     </>
   );
