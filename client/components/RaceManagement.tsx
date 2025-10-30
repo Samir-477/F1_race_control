@@ -22,6 +22,7 @@ interface Race {
   id: number;
   name: string;
   date: string;
+  status: string;
   circuit: Circuit;
   season: Season;
   participations: Array<{
@@ -131,6 +132,31 @@ const RaceManagement: React.FC = () => {
     }
   };
 
+  const handleDeleteRace = async (raceId: number, raceName: string) => {
+    if (!confirm(`Are you sure you want to delete "${raceName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:3002/api/races/${raceId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        toast.success('Race deleted successfully');
+        fetchData(); // Refresh the list
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to delete race');
+      }
+    } catch (error) {
+      console.error('Delete race error:', error);
+      toast.error('Failed to delete race');
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-[#161b22] p-6 rounded-lg border border-gray-700">
@@ -187,12 +213,23 @@ const RaceManagement: React.FC = () => {
                     </td>
                     <td className="py-4 px-4 text-gray-300">{race.participations.length} teams</td>
                     <td className="py-4 px-4">
-                      <button
-                        onClick={() => handleRaceSelect(race.id)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
-                      >
-                        View Details
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleRaceSelect(race.id)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+                        >
+                          View Details
+                        </button>
+                        {race.status === 'COMPLETED' && (
+                          <button
+                            onClick={() => handleDeleteRace(race.id, race.name)}
+                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+                            title="Delete completed race"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -394,19 +394,157 @@ export async function getRaceIncidents(req, res) {
 }
 
 /**
- * Finalize race and publish results
+ * Finalize & Publish race results (1-step process)
+ * This generates RaceResult records and marks race as COMPLETED
  */
 export async function finalizeRace(req, res) {
   try {
     const { raceId } = req.params;
+    const raceIdInt = parseInt(raceId);
 
-    // Get final standings
-    const standingsResponse = await getRaceStandings({ params: { raceId } }, { json: (data) => data });
-    
-    // Update race status to COMPLETED
-    const race = await prisma.race.update({
-      where: { id: parseInt(raceId) },
-      data: { status: 'COMPLETED' },
+    // Fetch race with logs
+    const raceData = await prisma.race.findUnique({
+      where: { id: raceIdInt },
+      include: {
+        circuit: true,
+        participations: {
+          include: {
+            team: {
+              include: {
+                drivers: true,
+              },
+            },
+          },
+        },
+        logs: {
+          include: {
+            driver: {
+              include: {
+                team: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!raceData) {
+      return res.status(404).json({ error: 'Race not found' });
+    }
+
+    if (raceData.logs.length === 0) {
+      return res.status(400).json({ 
+        error: 'No race logs found. Please generate race logs first.' 
+      });
+    }
+
+    // Check if race results already exist
+    const existingResults = await prisma.raceResult.findMany({
+      where: { raceId: raceIdInt }
+    });
+
+    if (existingResults.length > 0) {
+      return res.status(400).json({ 
+        error: 'Race results already exist. Cannot publish again.' 
+      });
+    }
+
+    // Get all drivers from participating teams
+    const drivers = raceData.participations.flatMap(p => 
+      p.team.drivers.map(d => ({
+        ...d,
+        team: p.team,
+      }))
+    );
+
+    // Re-simulate to get standings
+    const simulatedResults = simulateRace(drivers, raceData.circuit);
+
+    // Get incidents and penalties for each driver
+    const incidents = await prisma.raceIncident.findMany({
+      where: { raceId: raceIdInt },
+      include: {
+        driver: true,
+        penalty: true, // Penalty is directly on RaceIncident
+        penaltyAssignments: true,
+      },
+    });
+
+    // Calculate standings with penalties
+    let standings = simulatedResults.standings.map(result => {
+      const driverIncidents = incidents.filter(inc => inc.driverId === result.driverId);
+      // Sum up penalty time values from incidents that have penalties
+      const totalPenalty = driverIncidents.reduce((sum, inc) => {
+        if (inc.penalty && inc.penalty.value) {
+          // Extract numeric value from penalty (e.g., "5 seconds" -> 5)
+          const match = inc.penalty.value.match(/(\d+)/);
+          const penaltySeconds = match ? parseInt(match[1]) : 0;
+          return sum + penaltySeconds;
+        }
+        return sum;
+      }, 0);
+
+      return {
+        ...result,
+        totalPenalty: totalPenalty > 0 ? `${totalPenalty}s` : '0s',
+        penaltySeconds: totalPenalty,
+      };
+    });
+
+    // Sort by total time + penalties
+    standings.sort((a, b) => {
+      const timeA = parseFloat(a.totalTime.replace(/[^\d.]/g, '')) + a.penaltySeconds;
+      const timeB = parseFloat(b.totalTime.replace(/[^\d.]/g, '')) + b.penaltySeconds;
+      return timeA - timeB;
+    });
+
+    if (standings.length === 0) {
+      return res.status(400).json({ 
+        error: 'No standings data available.' 
+      });
+    }
+
+    // Points distribution for F1 (top 10)
+    const pointsMap = {
+      1: 25, 2: 18, 3: 15, 4: 12, 5: 10,
+      6: 8, 7: 6, 8: 4, 9: 2, 10: 1
+    };
+
+    // Create RaceResult records from standings
+    const createdResults = [];
+    for (let i = 0; i < standings.length; i++) {
+      const standing = standings[i];
+      const position = i + 1;
+      const points = pointsMap[position] || 0;
+
+      // Determine fastest lap (first driver gets it for simplicity)
+      const fastestLap = position === 1 ? standing.bestLapTime || '' : '';
+
+      const result = await prisma.raceResult.create({
+        data: {
+          raceId: raceIdInt,
+          driverId: standing.driverId,
+          teamId: standing.teamId,
+          position: position,
+          time: standing.totalTime || `+${position * 2}.${Math.floor(Math.random() * 1000)}s`,
+          points: points,
+          fastestLap: fastestLap,
+          penalty: standing.totalPenalty || '0s'
+        }
+      });
+
+      createdResults.push(result);
+    }
+
+    // Update race status to COMPLETED and mark as reviewed
+    const completedRace = await prisma.race.update({
+      where: { id: raceIdInt },
+      data: { 
+        status: 'COMPLETED',
+        isReviewed: true,
+        reviewedById: req.user?.id || null,
+        reviewedAt: new Date()
+      },
       include: {
         circuit: true,
         season: true,
@@ -414,11 +552,18 @@ export async function finalizeRace(req, res) {
     });
 
     res.json({
-      message: 'Race finalized successfully',
-      race,
+      message: `Race published successfully! Generated ${createdResults.length} race results.`,
+      race: completedRace,
+      resultsCount: createdResults.length
     });
   } catch (error) {
-    console.error('Error finalizing race:', error);
-    res.status(500).json({ error: 'Failed to finalize race' });
+    console.error('Error publishing race:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      meta: error.meta
+    });
+    res.status(500).json({ error: 'Failed to publish race: ' + error.message });
   }
 }

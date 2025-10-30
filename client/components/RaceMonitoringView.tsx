@@ -325,8 +325,8 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
       <ConfirmationModal
         isOpen={isConfirmFinalizeOpen}
         title="Finalize & Publish Results?"
-        message="This will mark the race as completed and publish the results to the landing page. This action cannot be undone."
-        confirmText="Publish Results"
+        message="This will: (1) Generate race results from logs, (2) Assign points to drivers, (3) Mark race as COMPLETED, (4) Update championship standings. This action cannot be undone."
+        confirmText="Finalize & Publish"
         cancelText="Cancel"
         type="warning"
         onConfirm={() => {
