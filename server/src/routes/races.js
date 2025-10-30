@@ -305,6 +305,27 @@ router.post('/races', authMiddleware, async (req, res) => {
   }
 });
 
+// Get race results for a specific race
+router.get('/races/:id/results', authMiddleware, async (req, res) => {
+  try {
+    const raceId = parseInt(req.params.id);
+
+    const results = await prisma.raceResult.findMany({
+      where: { raceId },
+      include: {
+        driver: true,
+        team: true
+      },
+      orderBy: { position: 'asc' }
+    });
+
+    res.json(results);
+  } catch (error) {
+    console.error('Get race results error:', error);
+    res.status(500).json({ error: 'Failed to fetch race results' });
+  }
+});
+
 // Get teams participating in a specific race
 router.get('/races/:id/participants', async (req, res) => {
   try {
@@ -408,7 +429,7 @@ router.put('/races/:id/participants', authMiddleware, async (req, res) => {
   }
 });
 
-// Delete a race (Admin only)
+// Delete a race (Admin only - only COMPLETED races)
 router.delete('/races/:id', authMiddleware, async (req, res) => {
   if (req.user.role !== 'ADMIN') {
     return res.status(403).json({ error: 'Only admins can delete races' });
@@ -417,11 +438,57 @@ router.delete('/races/:id', authMiddleware, async (req, res) => {
   try {
     const raceId = parseInt(req.params.id);
 
-    const race = await prisma.race.delete({
+    // Check if race exists and is COMPLETED
+    const race = await prisma.race.findUnique({
       where: { id: raceId }
     });
 
-    res.json(race);
+    if (!race) {
+      return res.status(404).json({ error: 'Race not found' });
+    }
+
+    if (race.status !== 'COMPLETED') {
+      return res.status(400).json({ 
+        error: 'Only completed races can be deleted. Current status: ' + race.status 
+      });
+    }
+
+    // Delete related records first (in correct order to avoid foreign key constraints)
+    // 1. Delete penalty assignments (references race incidents)
+    await prisma.penaltyAssignment.deleteMany({
+      where: {
+        incident: {
+          raceId: raceId
+        }
+      }
+    });
+
+    // 2. Delete race incidents
+    await prisma.raceIncident.deleteMany({
+      where: { raceId: raceId }
+    });
+
+    // 3. Delete race results
+    await prisma.raceResult.deleteMany({
+      where: { raceId: raceId }
+    });
+
+    // 4. Delete race logs
+    await prisma.raceLog.deleteMany({
+      where: { raceId: raceId }
+    });
+
+    // 5. Delete race participations
+    await prisma.raceParticipation.deleteMany({
+      where: { raceId: raceId }
+    });
+
+    // 6. Finally, delete the race itself
+    await prisma.race.delete({
+      where: { id: raceId }
+    });
+
+    res.json({ message: 'Race deleted successfully', race });
   } catch (error) {
     console.error('Delete race error:', error);
     res.status(500).json({ error: 'Failed to delete race' });
@@ -875,10 +942,10 @@ router.post('/races/:raceId/create-incident', authMiddleware, raceController.cre
 // Get all incidents for a race
 router.get('/races/:raceId/race-incidents', authMiddleware, raceController.getRaceIncidents);
 
-// Finalize race and publish results
+// Finalize & Publish race results (1-step process)
 router.post('/races/:raceId/finalize', authMiddleware, raceController.finalizeRace);
 
-// Review/Accept race (Steward only)
+// Review endpoint (for steward acceptance - just marks as reviewed)
 router.post('/races/:raceId/review', authMiddleware, async (req, res) => {
   try {
     if (req.user.role !== 'STEWARD' && req.user.role !== 'ADMIN') {

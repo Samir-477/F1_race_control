@@ -5,6 +5,11 @@ import { useAuth } from '../contexts/AuthContext';
 import CreateTeamModal from './CreateTeamModal';
 import StewardManagement from './StewardManagement';
 import RaceManagement from './RaceManagement';
+import RaceResultsView from './RaceResultsView';
+import TeamPerformance from './TeamPerformance';
+import TriggerManagement from './TriggerManagement';
+import PenaltyStatistics from './PenaltyStatistics';
+import DriversWithIncidents from './DriversWithIncidents';
 
 // Sub-components for the Team Editor
 const EditorTabButton: React.FC<{ active: boolean; onClick: () => void; children: React.ReactNode }> = ({ active, onClick, children }) => (
@@ -352,6 +357,26 @@ const AdminDashboard: React.FC = () => {
       return <RaceManagement />;
     }
 
+    if (activeView === 'championship') {
+      return <RaceResultsView />;
+    }
+
+    if (activeView === 'race-report') {
+      return <TeamPerformance />;
+    }
+
+    if (activeView === 'triggers') {
+      return <TriggerManagement />;
+    }
+
+    if (activeView === 'penalties') {
+      return <PenaltyStatistics />;
+    }
+
+    if (activeView === 'incidents') {
+      return <DriversWithIncidents />;
+    }
+
     // Team Management View
     if (editingTeam) {
       const currentTeam = teams.find(t => t.id === editingTeam.id) || editingTeam;
@@ -416,9 +441,19 @@ const AdminDashboard: React.FC = () => {
         <div className="flex flex-col md:flex-row gap-8 md:items-start">
           <aside className="md:w-1/3 lg:w-1/4 bg-[#161b22] p-4 rounded-lg border border-gray-700 self-stretch">
             <nav className="flex flex-col gap-2">
+              <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-2">Management</div>
               <SidebarButton viewName="teams" label="Team Management" />
               <SidebarButton viewName="stewards" label="Steward Management" />
               <SidebarButton viewName="races" label="Race Management" />
+              
+              <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-2 mt-4">Analytics & Reports</div>
+              <SidebarButton viewName="championship" label="Championship Standings" />
+              <SidebarButton viewName="race-report" label="Team Performance" />
+              <SidebarButton viewName="penalties" label="Penalty Statistics" />
+              <SidebarButton viewName="incidents" label="Drivers with Incidents" />
+              
+              <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-2 mt-4">Database Features</div>
+              <SidebarButton viewName="triggers" label="Trigger Management" />
             </nav>
           </aside>
           <main className="flex-1">
