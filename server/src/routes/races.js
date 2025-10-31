@@ -141,14 +141,12 @@ router.get('/races/latest-result', async (req, res) => {
       include: {
         circuit: true,
         season: true,
-        participations: {
+        results: {
           include: {
-            team: {
-              include: {
-                drivers: true
-              }
-            }
-          }
+            driver: true,
+            team: true
+          },
+          orderBy: { position: 'asc' }
         }
       },
       orderBy: { date: 'desc' }
@@ -158,66 +156,20 @@ router.get('/races/latest-result', async (req, res) => {
       return res.json(null);
     }
 
-    // Get all drivers from participating teams
-    const drivers = latestRace.participations.flatMap(p => 
-      p.team.drivers.map(d => ({
-        ...d,
-        team: p.team,
-      }))
-    );
+    // Check if race has results
+    if (!latestRace.results || latestRace.results.length === 0) {
+      return res.json(null);
+    }
 
-    // Re-simulate to get standings
-    const { simulateRace } = await import('../utils/raceSimulator.js');
-    const raceResults = simulateRace(drivers, latestRace.circuit);
-
-    // Get incidents and penalties for each driver
-    const incidents = await prisma.raceIncident.findMany({
-      where: { raceId: latestRace.id },
-      include: {
-        penalty: true,
-        driver: true,
-      },
-    });
-
-    // Apply penalties to standings
-    const standingsWithPenalties = raceResults.standings.map(standing => {
-      const driverIncidents = incidents.filter(inc => inc.driverId === standing.driverId);
-      const totalPenalty = driverIncidents.reduce((sum, inc) => {
-        if (inc.penalty && inc.penalty.type === 'TimePenalty') {
-          const penaltySeconds = parseFloat(inc.penalty.value.replace(/[^0-9.]/g, ''));
-          return sum + penaltySeconds;
-        }
-        return sum;
-      }, 0);
-
+    // Map stored results to standings format
+    const finalStandings = latestRace.results.map((result) => {
       return {
-        ...standing,
-        penalty: totalPenalty > 0 ? `${totalPenalty}s` : '0s',
-        penaltySeconds: totalPenalty,
-      };
-    });
-
-    // Re-sort by total time + penalties
-    standingsWithPenalties.sort((a, b) => {
-      const aTime = parseFloat(a.totalTime.split(':')[0]) * 60 + parseFloat(a.totalTime.split(':')[1]) + a.penaltySeconds;
-      const bTime = parseFloat(b.totalTime.split(':')[0]) * 60 + parseFloat(b.totalTime.split(':')[1]) + b.penaltySeconds;
-      return aTime - bTime;
-    });
-
-    // Update positions and calculate points
-    const finalStandings = standingsWithPenalties.map((standing, index) => {
-      const position = index + 1;
-      // F1 points system: 25, 18, 15, 12, 10, 8, 6, 4, 2, 1
-      const pointsMap = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
-      const points = position <= 10 ? pointsMap[position - 1] : 0;
-
-      return {
-        position,
-        driver: standing.driverName,
-        team: standing.teamName,
-        time: position === 1 ? standing.totalTime : standing.gap,
-        points,
-        penalty: standing.penalty
+        position: result.position,
+        driver: result.driver.name,
+        team: result.team.name,
+        time: result.time,
+        points: result.points,
+        penalty: result.penalty || '0s'
       };
     });
 

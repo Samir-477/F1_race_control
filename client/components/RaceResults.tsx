@@ -127,9 +127,9 @@ const RaceResults: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {latestRace.standings.map((standing) => (
+              {latestRace.standings.map((standing, index) => (
                 <tr 
-                  key={standing.position} 
+                  key={`${standing.driver}-${standing.position}`}
                   className={`border-b border-gray-700 hover:bg-gray-700/30 transition-colors border-l-4 ${getPositionColor(standing.position)}`}
                 >
                   <td className="px-6 py-4">

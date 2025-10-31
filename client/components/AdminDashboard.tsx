@@ -266,10 +266,10 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => vo
       case 'car':
         return (
           <>
-            <FormSection title={`Car Details for ${team.name}`} onSubmit={(data) => handleSubmit(data, 'car')}>
-              <FormInput id="model" name="model" label="Model" value={team.car?.model} required />
-              <FormInput id="engine" name="engine" label="Engine" value={team.car?.engine} required />
-              <FormInput id="chassis" name="chassis" label="Chassis" value={team.car?.chassis} required />
+            <FormSection key={`car-${team.id}`} title={`Car Details for ${team.name}`} onSubmit={(data) => handleSubmit(data, 'car')}>
+              <FormInput key={`model-${team.id}`} id="model" name="model" label="Model" value={team.car?.model} required />
+              <FormInput key={`engine-${team.id}`} id="engine" name="engine" label="Engine" value={team.car?.engine} required />
+              <FormInput key={`chassis-${team.id}`} id="chassis" name="chassis" label="Chassis" value={team.car?.chassis} required />
               <div className="mt-4">
                 {loading ? (
                   <button 
