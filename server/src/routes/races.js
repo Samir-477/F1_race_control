@@ -406,16 +406,7 @@ router.delete('/races/:id', authMiddleware, async (req, res) => {
     }
 
     // Delete related records first (in correct order to avoid foreign key constraints)
-    // 1. Delete penalty assignments (references race incidents)
-    await prisma.penaltyAssignment.deleteMany({
-      where: {
-        incident: {
-          raceId: raceId
-        }
-      }
-    });
-
-    // 2. Delete race incidents
+    // 1. Delete race incidents
     await prisma.raceIncident.deleteMany({
       where: { raceId: raceId }
     });
@@ -616,13 +607,7 @@ router.get('/races/:id/incidents', authMiddleware, async (req, res) => {
         driver: {
           include: { team: true }
         },
-        penalty: true,
-        penaltyAssignments: {
-          include: {
-            steward: true,
-            approvedBy: true
-          }
-        }
+        penalty: true
       },
       orderBy: { lap: 'asc' }
     });
@@ -707,54 +692,10 @@ router.post('/incidents/:id/penalties', authMiddleware, async (req, res) => {
       }
     });
 
-    // Create penalty assignment
-    const assignment = await prisma.penaltyAssignment.create({
-      data: {
-        incidentId,
-        stewardId: req.user.id,
-        status: 'PENDING'
-      },
-      include: {
-        steward: true
-      }
-    });
-
-    res.status(201).json({ incident: updatedIncident, assignment });
+    res.status(201).json(updatedIncident);
   } catch (error) {
     console.error('Assign penalty error:', error);
     res.status(500).json({ error: 'Failed to assign penalty' });
-  }
-});
-
-// Approve penalty assignment
-router.put('/penalties/:id/approve', authMiddleware, async (req, res) => {
-  try {
-    const assignmentId = parseInt(req.params.id);
-
-    const assignment = await prisma.penaltyAssignment.update({
-      where: { id: assignmentId },
-      data: {
-        status: 'APPROVED',
-        approvedById: req.user.id
-      },
-      include: {
-        incident: {
-          include: {
-            driver: {
-              include: { team: true }
-            },
-            penalty: true
-          }
-        },
-        steward: true,
-        approvedBy: true
-      }
-    });
-
-    res.json(assignment);
-  } catch (error) {
-    console.error('Approve penalty error:', error);
-    res.status(500).json({ error: 'Failed to approve penalty' });
   }
 });
 
@@ -764,15 +705,8 @@ router.get('/steward/history', authMiddleware, async (req, res) => {
     const races = await prisma.race.findMany({
       where: {
         status: 'COMPLETED',
-        incidents: {
-          some: {
-            penaltyAssignments: {
-              some: {
-                stewardId: req.user.id
-              }
-            }
-          }
-        }
+        isReviewed: true,
+        reviewedById: req.user.id
       },
       include: {
         circuit: true,
@@ -782,14 +716,7 @@ router.get('/steward/history', authMiddleware, async (req, res) => {
             driver: {
               include: { team: true }
             },
-            penalty: true,
-            penaltyAssignments: {
-              where: { stewardId: req.user.id },
-              include: {
-                steward: true,
-                approvedBy: true
-              }
-            }
+            penalty: true
           }
         }
       },

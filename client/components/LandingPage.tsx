@@ -74,11 +74,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ teams }) => {
         <div id="top" className="relative z-10 w-full h-full flex items-center">
           <div id="workingarea" className="w-[90%] max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center text-white">
             <div id="heroleft" className="w-full">
-              <div className="relative h-[8.5vw] overflow-hidden">
+              <div className="relative h-[7.5vw] overflow-hidden">
                 {teams.map((team, index) => (
                   <h1
                     key={team.id}
-                    className={`absolute top-0 left-0 text-[8.5vw] font-black leading-none uppercase transition-transform duration-700 ease-in-out
+                    className={`absolute top-0 left-0 text-[7.5vw] font-black leading-none uppercase transition-transform duration-700 ease-in-out
                       ${currentIndex === index ? 'translate-y-0' : 'translate-y-full'}
                       ${(currentIndex - 1 + teams.length) % teams.length === index ? '-translate-y-full' : ''}`}
                     style={{ WebkitTextStroke: '2px white', color: 'transparent' }}
@@ -87,11 +87,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ teams }) => {
                   </h1>
                 ))}
               </div>
-              <div className="relative h-[8.5vw] overflow-hidden">
+              <div className="relative h-[7.5vw] overflow-hidden">
                  {teams.map((team, index) => (
                   <h1
                     key={team.id}
-                    className={`absolute top-0 left-0 text-[8.5vw] font-black leading-none uppercase transition-transform duration-700 ease-in-out
+                    className={`absolute top-0 left-0 text-[7.5vw] font-black leading-none uppercase transition-transform duration-700 ease-in-out
                       ${currentIndex === index ? 'translate-y-0' : 'translate-y-full'}
                       ${(currentIndex - 1 + teams.length) % teams.length === index ? '-translate-y-full' : ''}`}
                   >
@@ -103,7 +103,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ teams }) => {
                 Explore Now
               </button>
             </div>
-            <div id="heroright" className="w-full hidden md:flex justify-end">
+            <div id="heroright" className="w-full hidden md:flex justify-end items-start -mt-12">
               <TopPerformerCard driver={topPerformer} team={currentTeam} isVisible={!animating} />
             </div>
           </div>

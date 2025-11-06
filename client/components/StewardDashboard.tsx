@@ -82,18 +82,6 @@ interface RaceIncident {
     type: 'TimePenalty' | 'GridPenalty' | 'Warning' | 'NoFurtherAction';
     value: string;
   };
-  penaltyAssignments: Array<{
-    id: number;
-    status: 'PENDING' | 'APPROVED' | 'REJECTED';
-    steward: {
-      id: number;
-      username: string;
-    };
-    approvedBy?: {
-      id: number;
-      username: string;
-    };
-  }>;
 }
 
 const StewardDashboard: React.FC = () => {

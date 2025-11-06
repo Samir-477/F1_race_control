@@ -23,7 +23,6 @@ export interface IncidentFormData {
   description: string;
   penaltyType?: string;
   penaltyValue?: string;
-  useAI: boolean;
 }
 
 const AddIncidentModal: React.FC<AddIncidentModalProps> = ({
@@ -39,7 +38,6 @@ const AddIncidentModal: React.FC<AddIncidentModalProps> = ({
     description: '',
     penaltyType: '',
     penaltyValue: '',
-    useAI: false,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,7 +60,6 @@ const AddIncidentModal: React.FC<AddIncidentModalProps> = ({
         description: '',
         penaltyType: '',
         penaltyValue: '',
-        useAI: false,
       });
       onClose();
     } catch (error) {
@@ -135,40 +132,18 @@ const AddIncidentModal: React.FC<AddIncidentModalProps> = ({
             <p className="text-gray-500 text-sm mt-1">Total laps: {totalLaps}</p>
           </div>
 
-          {/* AI Description Toggle */}
-          <div className="flex items-center gap-3 p-4 bg-[#0d1117] rounded-lg border border-gray-700">
-            <input
-              type="checkbox"
-              id="useAI"
-              checked={formData.useAI}
-              onChange={(e) => setFormData({ ...formData, useAI: e.target.checked })}
-              className="w-5 h-5 text-red-600 bg-gray-700 border-gray-600 rounded focus:ring-red-500"
-            />
-            <label htmlFor="useAI" className="text-gray-300 cursor-pointer">
-              <span className="font-semibold">Use AI to generate description</span>
-              <p className="text-sm text-gray-500">
-                Gemini AI will create a realistic incident description based on the incident type
-              </p>
-            </label>
-          </div>
-
           {/* Description */}
           <div>
             <label className="block text-gray-300 font-semibold mb-2">
-              Description {!formData.useAI && <span className="text-red-500">*</span>}
+              Description <span className="text-red-500">*</span>
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={4}
-              placeholder={
-                formData.useAI
-                  ? 'AI will generate this based on penalty type...'
-                  : 'Describe the incident in detail...'
-              }
+              placeholder="Describe the incident in detail..."
               className="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-red-500 transition-colors resize-none"
-              required={!formData.useAI}
-              disabled={formData.useAI}
+              required
             />
           </div>
 
@@ -182,7 +157,6 @@ const AddIncidentModal: React.FC<AddIncidentModalProps> = ({
             >
               <option value="">No Penalty</option>
               <option value="TimePenalty">Time Penalty</option>
-              <option value="GridPenalty">Grid Penalty</option>
               <option value="Warning">Warning</option>
               <option value="NoFurtherAction">No Further Action</option>
             </select>
@@ -199,8 +173,6 @@ const AddIncidentModal: React.FC<AddIncidentModalProps> = ({
                 placeholder={
                   formData.penaltyType === 'TimePenalty'
                     ? 'e.g., 5 seconds, 10 seconds'
-                    : formData.penaltyType === 'GridPenalty'
-                    ? 'e.g., 3 grid places, 5 grid places'
                     : 'e.g., Official Warning'
                 }
                 className="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-red-500 transition-colors"

@@ -132,13 +132,13 @@ router.get('/race-report/:raceId', authMiddleware, async (req, res) => {
           s.year AS season,
           COUNT(DISTINCT rr.id) AS totalFinishers,
           COUNT(DISTINCT ri.id) AS totalIncidents,
-          COUNT(DISTINCT pa.id) AS totalPenalties
+          COUNT(DISTINCT p.id) AS totalPenalties
         FROM Race r
         INNER JOIN Circuit c ON r.circuitId = c.id
         INNER JOIN Season s ON r.seasonId = s.id
         LEFT JOIN RaceResult rr ON r.id = rr.raceId
         LEFT JOIN RaceIncident ri ON r.id = ri.raceId
-        LEFT JOIN PenaltyAssignment pa ON ri.id = pa.incidentId
+        LEFT JOIN Penalty p ON ri.penaltyId = p.id
         WHERE r.id = ${raceIdInt}
         GROUP BY r.id, r.name, r.date, r.status, c.name, c.location, c.country, c.length, c.laps, s.year
       `;
@@ -169,15 +169,11 @@ router.get('/race-report/:raceId', authMiddleware, async (req, res) => {
           t.name AS teamName,
           ri.description,
           p.type AS penaltyType,
-          p.value AS penaltyValue,
-          pa.status AS penaltyStatus,
-          u.name AS stewardName
+          p.value AS penaltyValue
         FROM RaceIncident ri
         INNER JOIN Driver d ON ri.driverId = d.id
         INNER JOIN Team t ON d.teamId = t.id
         LEFT JOIN Penalty p ON ri.penaltyId = p.id
-        LEFT JOIN PenaltyAssignment pa ON ri.id = pa.incidentId
-        LEFT JOIN User u ON pa.stewardId = u.id
         WHERE ri.raceId = ${raceIdInt}
         ORDER BY ri.lap
       `;

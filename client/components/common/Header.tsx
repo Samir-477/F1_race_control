@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import F1Logo from '../../assets/F1Logo';
+import f1sysLogo from '../../assets/f1sys.png';
 import type { UserRole } from '../../types';
 
 interface HeaderProps {
@@ -27,7 +27,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, onLoginClick, isDashboard }
         <nav className="flex justify-between items-center h-24">
           <div className="flex items-center gap-12 pointer-events-auto">
             <button onClick={() => onNavigate('landing')} className="focus:outline-none">
-              <F1Logo className="w-24 h-auto" />
+              <img src={f1sysLogo} alt="F1 System Logo" className="w-32 h-auto" />
             </button>
           </div>
           <div className="flex items-center gap-8 pointer-events-auto">

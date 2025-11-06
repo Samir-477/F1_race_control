@@ -31,12 +31,6 @@ enum RaceStatus {
   CANCELLED
 }
 
-enum PenaltyStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 enum LogSeverity {
   INFO
   WARNING
@@ -54,9 +48,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  penaltyAssignments PenaltyAssignment[]
-  approvedPenalties  PenaltyAssignment[] @relation("PenaltyApprover")
-  reviewedRaces      Race[]              @relation("RaceReviewer")
+  reviewedRaces Race[] @relation("RaceReviewer")
 }
 
 model Team {
@@ -228,8 +220,6 @@ model RaceIncident {
 
   penalty   Penalty? @relation(fields: [penaltyId], references: [id])
   penaltyId Int?     @unique // An incident can have at most one penalty
-
-  penaltyAssignments PenaltyAssignment[]
 }
 
 model Penalty {
@@ -259,21 +249,4 @@ model RaceLog {
   driverId Int?
   team     Team?   @relation(fields: [teamId], references: [id], onDelete: Cascade)
   teamId   Int?
-}
-
-model PenaltyAssignment {
-  id        Int           @id @default(autoincrement())
-  status    PenaltyStatus @default(PENDING)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-
-  // Relations
-  incident   RaceIncident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
-  incidentId Int
-  steward     User         @relation(fields: [stewardId], references: [id])
-  stewardId   Int
-  approvedBy  User?         @relation("PenaltyApprover", fields: [approvedById], references: [id])
-  approvedById Int?
-
-  @@unique([incidentId, stewardId]) // A steward can only assign one penalty per incident
 }

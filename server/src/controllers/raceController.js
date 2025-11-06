@@ -466,7 +466,6 @@ export async function finalizeRace(req, res) {
       include: {
         driver: true,
         penalty: true, // Penalty is directly on RaceIncident
-        penaltyAssignments: true,
       },
     });
 

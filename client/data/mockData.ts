@@ -15,7 +15,7 @@ const georgeRussell: Driver = { id: 8, name: 'George Russell', number: 63, natio
 const oracle: Sponsor = { id: 1, name: 'Oracle', logoUrl: '' };
 const castore: Sponsor = { id: 2, name: 'Castore', logoUrl: '' };
 const google: Sponsor = { id: 3, name: 'Google', logoUrl: '' };
-const hp: Sponsor = { id: 4, name: 'HP', logoUrl: '' };
+const hp: Sponsor = { id: 4, name: 'Scuderia', logoUrl: '' };
 const petronas: Sponsor = { id: 5, name: 'Petronas', logoUrl: '' };
 
 // Cars
@@ -79,7 +79,7 @@ export const TEAMS: Team[] = [
     base: 'Brackley, UK',
     teamChief: 'Toto Wolff',
     drivers: [lewisHamilton, georgeRussell],
-    topPerformer: lewisHamilton,
+    topPerformer: georgeRussell,
     car: w15,
     sponsors: [petronas],
     color: 'bg-teal-500',
