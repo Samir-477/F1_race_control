@@ -1,0 +1,1161 @@
+{
+  "exportDate": "2025-11-06T13:48:23.848Z",
+  "seasons": [
+    {
+      "id": 1,
+      "year": 2024,
+      "name": "2024 Formula 1 World Championship",
+      "isActive": true,
+      "createdAt": "2025-10-31T08:50:07.473Z",
+      "updatedAt": "2025-10-31T08:50:07.473Z"
+    },
+    {
+      "id": 2,
+      "year": 2025,
+      "name": "2025 Formula 1 World Championship",
+      "isActive": false,
+      "createdAt": "2025-10-31T08:50:07.477Z",
+      "updatedAt": "2025-10-31T08:50:07.477Z"
+    },
+    {
+      "id": 3,
+      "year": 2023,
+      "name": "2023 Formula 1 World Championship",
+      "isActive": false,
+      "createdAt": "2025-10-31T08:50:07.480Z",
+      "updatedAt": "2025-10-31T08:50:07.480Z"
+    }
+  ],
+  "teams": [
+    {
+      "id": 1,
+      "name": "Red Bull",
+      "fullName": "Oracle Red Bull Racing",
+      "description": "A team from Austria, starting as the underdogs in 2005 lead by Christian Horner. They have 6 constructor championships, now being one of the top teams in 2025.",
+      "base": "Milton Keynes, UK",
+      "teamChief": "Laurent Mekkies",
+      "color": "#003773",
+      "createdAt": "2025-10-31T08:53:17.313Z",
+      "updatedAt": "2025-10-31T08:53:17.313Z"
+    },
+    {
+      "id": 2,
+      "name": "Ferrari",
+      "fullName": "Scuderia Ferrari HP",
+      "description": "A legacy team from the starting days of F1, the Italian racing giant has always been  a major part of motorsport history. They have a massive 16 constructor championship wins.",
+      "base": "Maranello, Italy",
+      "teamChief": "Fred Vasseur",
+      "color": "#FF0000",
+      "createdAt": "2025-10-31T08:57:42.578Z",
+      "updatedAt": "2025-10-31T08:57:42.578Z"
+    },
+    {
+      "id": 3,
+      "name": "McLaren",
+      "fullName": "McLaren Mercedes",
+      "description": "The British team has its hands in Formula 1 from the very beginning of races. They have dominated in the past and are dominating now. They have 10 constructor titles.",
+      "base": "Woking, England",
+      "teamChief": "Andrea Stella",
+      "color": "#ff9500",
+      "createdAt": "2025-10-31T09:01:55.971Z",
+      "updatedAt": "2025-10-31T09:01:55.971Z"
+    },
+    {
+      "id": 4,
+      "name": "Mercedes",
+      "fullName": "Mercedes AMG Petronas",
+      "description": "The Mercedes-AMG Petronas Formula One Team is a dominant force in Formula 1, known for its engineering excellence, precision, and consistency on the track. Based in Brackley, England, the team has produced some of the sport’s most successful cars and drivers. They have won 8 Constructors’ Championships in total.",
+      "base": "Brackley, England",
+      "teamChief": "Toto Wolff",
+      "color": "#00ffee",
+      "createdAt": "2025-10-31T09:05:45.362Z",
+      "updatedAt": "2025-10-31T09:05:45.362Z"
+    },
+    {
+      "id": 5,
+      "name": "Aston Martin",
+      "fullName": "Aramco Aston Martin Racing",
+      "description": "Aston Martin is a British Formula 1 team known for its sleek racing heritage and strong technical partnerships. They focus on consistent performance and innovation, aiming to challenge the sport’s front-runners. Backed by passionate leadership, the team continues to grow with competitive ambitions on the grid.",
+      "base": "Silverstone, England",
+      "teamChief": "Andy Cowell",
+      "color": "#1D6D1F",
+      "createdAt": "2025-11-05T15:37:30.205Z",
+      "updatedAt": "2025-11-06T13:00:25.287Z"
+    }
+  ],
+  "drivers": [
+    {
+      "id": 1,
+      "name": "Max Verstappen",
+      "number": 1,
+      "nationality": "Dutch",
+      "teamId": 1,
+      "points": 25,
+      "createdAt": "2025-10-31T08:53:36.417Z",
+      "updatedAt": "2025-10-31T08:53:36.417Z"
+    },
+    {
+      "id": 2,
+      "name": "Yuki Tsunoda",
+      "number": 22,
+      "nationality": "Japanese",
+      "teamId": 1,
+      "points": 26,
+      "createdAt": "2025-10-31T08:54:16.017Z",
+      "updatedAt": "2025-10-31T08:54:16.017Z"
+    },
+    {
+      "id": 3,
+      "name": "Lewis Hamilton",
+      "number": 44,
+      "nationality": "British",
+      "teamId": 2,
+      "points": 53,
+      "createdAt": "2025-10-31T08:57:59.612Z",
+      "updatedAt": "2025-10-31T08:57:59.612Z"
+    },
+    {
+      "id": 4,
+      "name": "Charles Leclerc",
+      "number": 16,
+      "nationality": "Monaco",
+      "teamId": 2,
+      "points": 54,
+      "createdAt": "2025-10-31T08:58:14.687Z",
+      "updatedAt": "2025-10-31T08:58:14.687Z"
+    },
+    {
+      "id": 6,
+      "name": "Lando Norris",
+      "number": 4,
+      "nationality": "British",
+      "teamId": 3,
+      "points": 69,
+      "createdAt": "2025-10-31T09:02:19.986Z",
+      "updatedAt": "2025-10-31T09:02:19.986Z"
+    },
+    {
+      "id": 7,
+      "name": "Oscar Piastri",
+      "number": 81,
+      "nationality": "Australia",
+      "teamId": 3,
+      "points": 75,
+      "createdAt": "2025-10-31T09:02:38.254Z",
+      "updatedAt": "2025-10-31T09:02:38.254Z"
+    },
+    {
+      "id": 8,
+      "name": "George Russell",
+      "number": 63,
+      "nationality": "British",
+      "teamId": 4,
+      "points": 52,
+      "createdAt": "2025-10-31T09:06:17.112Z",
+      "updatedAt": "2025-10-31T09:06:17.112Z"
+    },
+    {
+      "id": 9,
+      "name": "Kimi Antonelli",
+      "number": 12,
+      "nationality": "Italian",
+      "teamId": 4,
+      "points": 99,
+      "createdAt": "2025-10-31T09:06:47.244Z",
+      "updatedAt": "2025-10-31T09:06:47.244Z"
+    },
+    {
+      "id": 10,
+      "name": "Fernando Alonso",
+      "number": 14,
+      "nationality": "Spanish",
+      "teamId": 5,
+      "points": 15,
+      "createdAt": "2025-11-06T12:35:15.762Z",
+      "updatedAt": "2025-11-06T12:35:15.762Z"
+    },
+    {
+      "id": 11,
+      "name": "Lance Stroll",
+      "number": 18,
+      "nationality": "Canadian",
+      "teamId": 5,
+      "points": 25,
+      "createdAt": "2025-11-06T12:57:22.025Z",
+      "updatedAt": "2025-11-06T12:57:22.025Z"
+    }
+  ],
+  "circuits": [
+    {
+      "id": 1,
+      "name": "Monaco Grand Prix",
+      "location": "Monte Carlo",
+      "country": "Monaco",
+      "length": 3.337,
+      "laps": 78,
+      "createdAt": "2025-10-31T08:50:07.430Z",
+      "updatedAt": "2025-10-31T08:50:07.430Z"
+    },
+    {
+      "id": 2,
+      "name": "Silverstone Circuit",
+      "location": "Silverstone",
+      "country": "United Kingdom",
+      "length": 5.891,
+      "laps": 52,
+      "createdAt": "2025-10-31T08:50:07.438Z",
+      "updatedAt": "2025-10-31T08:50:07.438Z"
+    },
+    {
+      "id": 3,
+      "name": "Spa-Francorchamps",
+      "location": "Spa",
+      "country": "Belgium",
+      "length": 7.004,
+      "laps": 44,
+      "createdAt": "2025-10-31T08:50:07.441Z",
+      "updatedAt": "2025-10-31T08:50:07.441Z"
+    },
+    {
+      "id": 4,
+      "name": "Monza Circuit",
+      "location": "Monza",
+      "country": "Italy",
+      "length": 5.793,
+      "laps": 53,
+      "createdAt": "2025-10-31T08:50:07.446Z",
+      "updatedAt": "2025-10-31T08:50:07.446Z"
+    },
+    {
+      "id": 5,
+      "name": "Suzuka Circuit",
+      "location": "Suzuka",
+      "country": "Japan",
+      "length": 5.807,
+      "laps": 53,
+      "createdAt": "2025-10-31T08:50:07.452Z",
+      "updatedAt": "2025-10-31T08:50:07.452Z"
+    },
+    {
+      "id": 6,
+      "name": "Interlagos Circuit",
+      "location": "São Paulo",
+      "country": "Brazil",
+      "length": 4.309,
+      "laps": 71,
+      "createdAt": "2025-10-31T08:50:07.455Z",
+      "updatedAt": "2025-10-31T08:50:07.455Z"
+    },
+    {
+      "id": 7,
+      "name": "Circuit of the Americas",
+      "location": "Austin",
+      "country": "United States",
+      "length": 5.513,
+      "laps": 56,
+      "createdAt": "2025-10-31T08:50:07.458Z",
+      "updatedAt": "2025-10-31T08:50:07.458Z"
+    },
+    {
+      "id": 8,
+      "name": "Red Bull Ring",
+      "location": "Spielberg",
+      "country": "Austria",
+      "length": 4.318,
+      "laps": 71,
+      "createdAt": "2025-10-31T08:50:07.461Z",
+      "updatedAt": "2025-10-31T08:50:07.461Z"
+    },
+    {
+      "id": 9,
+      "name": "Hungaroring",
+      "location": "Budapest",
+      "country": "Hungary",
+      "length": 4.381,
+      "laps": 70,
+      "createdAt": "2025-10-31T08:50:07.465Z",
+      "updatedAt": "2025-10-31T08:50:07.465Z"
+    },
+    {
+      "id": 10,
+      "name": "Bahrain International Circuit",
+      "location": "Sakhir",
+      "country": "Bahrain",
+      "length": 5.412,
+      "laps": 57,
+      "createdAt": "2025-10-31T08:50:07.470Z",
+      "updatedAt": "2025-10-31T08:50:07.470Z"
+    }
+  ],
+  "races": [
+    {
+      "id": 1,
+      "name": "MSC Cruises Grande Prêmio de São Paulo 2025",
+      "date": "2025-08-08T00:00:00.000Z",
+      "circuitId": 6,
+      "seasonId": 2,
+      "status": "COMPLETED",
+      "isReviewed": true,
+      "reviewedById": 2,
+      "createdAt": "2025-10-31T09:16:33.066Z",
+      "updatedAt": "2025-10-31T09:19:44.317Z"
+    },
+    {
+      "id": 2,
+      "name": "COTA Texas Grand Prix",
+      "date": "2025-08-31T00:00:00.000Z",
+      "circuitId": 7,
+      "seasonId": 2,
+      "status": "COMPLETED",
+      "isReviewed": true,
+      "reviewedById": 2,
+      "createdAt": "2025-10-31T09:35:45.304Z",
+      "updatedAt": "2025-10-31T09:38:24.275Z"
+    },
+    {
+      "id": 3,
+      "name": "Silverstone grand prix",
+      "date": "2025-09-07T00:00:00.000Z",
+      "circuitId": 2,
+      "seasonId": 2,
+      "status": "COMPLETED",
+      "isReviewed": true,
+      "reviewedById": 2,
+      "createdAt": "2025-10-31T09:45:54.633Z",
+      "updatedAt": "2025-10-31T09:46:53.338Z"
+    },
+    {
+      "id": 4,
+      "name": "Monaco Grand Prix",
+      "date": "2025-09-14T00:00:00.000Z",
+      "circuitId": 1,
+      "seasonId": 2,
+      "status": "COMPLETED",
+      "isReviewed": true,
+      "reviewedById": 2,
+      "createdAt": "2025-11-05T16:47:12.313Z",
+      "updatedAt": "2025-11-05T16:48:05.543Z"
+    },
+    {
+      "id": 5,
+      "name": "Japanese Grand Prix",
+      "date": "2025-09-28T00:00:00.000Z",
+      "circuitId": 5,
+      "seasonId": 2,
+      "status": "COMPLETED",
+      "isReviewed": true,
+      "reviewedById": 2,
+      "createdAt": "2025-11-06T13:01:17.674Z",
+      "updatedAt": "2025-11-06T13:02:15.449Z"
+    }
+  ],
+  "raceResults": [
+    {
+      "id": 1,
+      "raceId": 1,
+      "driverId": 9,
+      "teamId": 4,
+      "position": 1,
+      "points": 25,
+      "time": "104:45.038",
+      "fastestLap": "",
+      "penalty": "10s",
+      "createdAt": "2025-10-31T09:19:44.257Z",
+      "updatedAt": "2025-10-31T09:19:44.257Z"
+    },
+    {
+      "id": 2,
+      "raceId": 1,
+      "driverId": 8,
+      "teamId": 4,
+      "position": 2,
+      "points": 18,
+      "time": "104:51.556",
+      "fastestLap": "",
+      "penalty": "20s",
+      "createdAt": "2025-10-31T09:19:44.270Z",
+      "updatedAt": "2025-10-31T09:19:44.270Z"
+    },
+    {
+      "id": 3,
+      "raceId": 1,
+      "driverId": 6,
+      "teamId": 3,
+      "position": 3,
+      "points": 15,
+      "time": "105:03.823",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:19:44.276Z",
+      "updatedAt": "2025-10-31T09:19:44.276Z"
+    },
+    {
+      "id": 4,
+      "raceId": 1,
+      "driverId": 7,
+      "teamId": 3,
+      "position": 4,
+      "points": 12,
+      "time": "105:25.291",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:19:44.282Z",
+      "updatedAt": "2025-10-31T09:19:44.282Z"
+    },
+    {
+      "id": 5,
+      "raceId": 1,
+      "driverId": 3,
+      "teamId": 2,
+      "position": 5,
+      "points": 10,
+      "time": "105:35.890",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:19:44.288Z",
+      "updatedAt": "2025-10-31T09:19:44.288Z"
+    },
+    {
+      "id": 6,
+      "raceId": 1,
+      "driverId": 4,
+      "teamId": 2,
+      "position": 6,
+      "points": 8,
+      "time": "105:57.642",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:19:44.293Z",
+      "updatedAt": "2025-10-31T09:19:44.293Z"
+    },
+    {
+      "id": 7,
+      "raceId": 1,
+      "driverId": 2,
+      "teamId": 1,
+      "position": 7,
+      "points": 6,
+      "time": "106:42.544",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:19:44.301Z",
+      "updatedAt": "2025-10-31T09:19:44.301Z"
+    },
+    {
+      "id": 8,
+      "raceId": 1,
+      "driverId": 1,
+      "teamId": 1,
+      "position": 8,
+      "points": 4,
+      "time": "107:36.298",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:19:44.306Z",
+      "updatedAt": "2025-10-31T09:19:44.306Z"
+    },
+    {
+      "id": 9,
+      "raceId": 2,
+      "driverId": 7,
+      "teamId": 3,
+      "position": 1,
+      "points": 25,
+      "time": "83:19.269",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:38:24.230Z",
+      "updatedAt": "2025-10-31T09:38:24.230Z"
+    },
+    {
+      "id": 10,
+      "raceId": 2,
+      "driverId": 6,
+      "teamId": 3,
+      "position": 2,
+      "points": 18,
+      "time": "83:22.177",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:38:24.236Z",
+      "updatedAt": "2025-10-31T09:38:24.236Z"
+    },
+    {
+      "id": 11,
+      "raceId": 2,
+      "driverId": 3,
+      "teamId": 2,
+      "position": 3,
+      "points": 15,
+      "time": "83:39.624",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:38:24.241Z",
+      "updatedAt": "2025-10-31T09:38:24.241Z"
+    },
+    {
+      "id": 12,
+      "raceId": 2,
+      "driverId": 4,
+      "teamId": 2,
+      "position": 4,
+      "points": 12,
+      "time": "83:41.859",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:38:24.246Z",
+      "updatedAt": "2025-10-31T09:38:24.246Z"
+    },
+    {
+      "id": 13,
+      "raceId": 2,
+      "driverId": 1,
+      "teamId": 1,
+      "position": 5,
+      "points": 10,
+      "time": "84:13.348",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:38:24.252Z",
+      "updatedAt": "2025-10-31T09:38:24.252Z"
+    },
+    {
+      "id": 14,
+      "raceId": 2,
+      "driverId": 2,
+      "teamId": 1,
+      "position": 6,
+      "points": 8,
+      "time": "84:17.296",
+      "fastestLap": "",
+      "penalty": "20s",
+      "createdAt": "2025-10-31T09:38:24.257Z",
+      "updatedAt": "2025-10-31T09:38:24.257Z"
+    },
+    {
+      "id": 15,
+      "raceId": 2,
+      "driverId": 9,
+      "teamId": 4,
+      "position": 7,
+      "points": 6,
+      "time": "82:55.959",
+      "fastestLap": "",
+      "penalty": "300s",
+      "createdAt": "2025-10-31T09:38:24.263Z",
+      "updatedAt": "2025-10-31T09:38:24.263Z"
+    },
+    {
+      "id": 16,
+      "raceId": 2,
+      "driverId": 8,
+      "teamId": 4,
+      "position": 8,
+      "points": 4,
+      "time": "82:56.477",
+      "fastestLap": "",
+      "penalty": "400s",
+      "createdAt": "2025-10-31T09:38:24.269Z",
+      "updatedAt": "2025-10-31T09:38:24.269Z"
+    },
+    {
+      "id": 17,
+      "raceId": 3,
+      "driverId": 9,
+      "teamId": 4,
+      "position": 1,
+      "points": 25,
+      "time": "76:35.117",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:46:53.284Z",
+      "updatedAt": "2025-10-31T09:46:53.284Z"
+    },
+    {
+      "id": 18,
+      "raceId": 3,
+      "driverId": 7,
+      "teamId": 3,
+      "position": 2,
+      "points": 18,
+      "time": "76:57.231",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:46:53.294Z",
+      "updatedAt": "2025-10-31T09:46:53.294Z"
+    },
+    {
+      "id": 19,
+      "raceId": 3,
+      "driverId": 4,
+      "teamId": 2,
+      "position": 3,
+      "points": 15,
+      "time": "77:26.422",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:46:53.300Z",
+      "updatedAt": "2025-10-31T09:46:53.300Z"
+    },
+    {
+      "id": 20,
+      "raceId": 3,
+      "driverId": 3,
+      "teamId": 2,
+      "position": 4,
+      "points": 12,
+      "time": "77:51.664",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:46:53.308Z",
+      "updatedAt": "2025-10-31T09:46:53.308Z"
+    },
+    {
+      "id": 21,
+      "raceId": 3,
+      "driverId": 8,
+      "teamId": 4,
+      "position": 5,
+      "points": 10,
+      "time": "77:03.351",
+      "fastestLap": "",
+      "penalty": "50s",
+      "createdAt": "2025-10-31T09:46:53.313Z",
+      "updatedAt": "2025-10-31T09:46:53.313Z"
+    },
+    {
+      "id": 22,
+      "raceId": 3,
+      "driverId": 6,
+      "teamId": 3,
+      "position": 6,
+      "points": 8,
+      "time": "77:24.710",
+      "fastestLap": "",
+      "penalty": "30s",
+      "createdAt": "2025-10-31T09:46:53.321Z",
+      "updatedAt": "2025-10-31T09:46:53.321Z"
+    },
+    {
+      "id": 23,
+      "raceId": 3,
+      "driverId": 1,
+      "teamId": 1,
+      "position": 7,
+      "points": 6,
+      "time": "78:33.479",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:46:53.326Z",
+      "updatedAt": "2025-10-31T09:46:53.326Z"
+    },
+    {
+      "id": 24,
+      "raceId": 3,
+      "driverId": 2,
+      "teamId": 1,
+      "position": 8,
+      "points": 4,
+      "time": "79:00.566",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-10-31T09:46:53.331Z",
+      "updatedAt": "2025-10-31T09:46:53.331Z"
+    },
+    {
+      "id": 25,
+      "raceId": 4,
+      "driverId": 9,
+      "teamId": 4,
+      "position": 1,
+      "points": 25,
+      "time": "115:04.138",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-05T16:48:05.515Z",
+      "updatedAt": "2025-11-05T16:48:05.515Z"
+    },
+    {
+      "id": 26,
+      "raceId": 4,
+      "driverId": 6,
+      "teamId": 3,
+      "position": 2,
+      "points": 18,
+      "time": "115:36.833",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-05T16:48:05.526Z",
+      "updatedAt": "2025-11-05T16:48:05.526Z"
+    },
+    {
+      "id": 27,
+      "raceId": 4,
+      "driverId": 4,
+      "teamId": 2,
+      "position": 3,
+      "points": 15,
+      "time": "115:49.293",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-05T16:48:05.528Z",
+      "updatedAt": "2025-11-05T16:48:05.528Z"
+    },
+    {
+      "id": 28,
+      "raceId": 4,
+      "driverId": 7,
+      "teamId": 3,
+      "position": 4,
+      "points": 12,
+      "time": "115:49.501",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-05T16:48:05.531Z",
+      "updatedAt": "2025-11-05T16:48:05.531Z"
+    },
+    {
+      "id": 29,
+      "raceId": 4,
+      "driverId": 3,
+      "teamId": 2,
+      "position": 5,
+      "points": 10,
+      "time": "116:25.846",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-05T16:48:05.533Z",
+      "updatedAt": "2025-11-05T16:48:05.533Z"
+    },
+    {
+      "id": 30,
+      "raceId": 4,
+      "driverId": 8,
+      "teamId": 4,
+      "position": 6,
+      "points": 8,
+      "time": "114:17.778",
+      "fastestLap": "",
+      "penalty": "355s",
+      "createdAt": "2025-11-05T16:48:05.536Z",
+      "updatedAt": "2025-11-05T16:48:05.536Z"
+    },
+    {
+      "id": 31,
+      "raceId": 4,
+      "driverId": 2,
+      "teamId": 1,
+      "position": 7,
+      "points": 6,
+      "time": "118:00.565",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-05T16:48:05.539Z",
+      "updatedAt": "2025-11-05T16:48:05.539Z"
+    },
+    {
+      "id": 32,
+      "raceId": 4,
+      "driverId": 1,
+      "teamId": 1,
+      "position": 8,
+      "points": 4,
+      "time": "118:04.062",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-05T16:48:05.540Z",
+      "updatedAt": "2025-11-05T16:48:05.540Z"
+    },
+    {
+      "id": 33,
+      "raceId": 5,
+      "driverId": 11,
+      "teamId": 5,
+      "position": 1,
+      "points": 25,
+      "time": "77:18.270",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-06T13:02:15.331Z",
+      "updatedAt": "2025-11-06T13:02:15.331Z"
+    },
+    {
+      "id": 34,
+      "raceId": 5,
+      "driverId": 9,
+      "teamId": 4,
+      "position": 2,
+      "points": 18,
+      "time": "77:41.397",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-06T13:02:15.346Z",
+      "updatedAt": "2025-11-06T13:02:15.346Z"
+    },
+    {
+      "id": 35,
+      "raceId": 5,
+      "driverId": 10,
+      "teamId": 5,
+      "position": 3,
+      "points": 15,
+      "time": "77:42.653",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-06T13:02:15.357Z",
+      "updatedAt": "2025-11-06T13:02:15.357Z"
+    },
+    {
+      "id": 36,
+      "raceId": 5,
+      "driverId": 8,
+      "teamId": 4,
+      "position": 4,
+      "points": 12,
+      "time": "78:27.398",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-06T13:02:15.368Z",
+      "updatedAt": "2025-11-06T13:02:15.368Z"
+    },
+    {
+      "id": 37,
+      "raceId": 5,
+      "driverId": 6,
+      "teamId": 3,
+      "position": 5,
+      "points": 10,
+      "time": "78:51.046",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-06T13:02:15.378Z",
+      "updatedAt": "2025-11-06T13:02:15.378Z"
+    },
+    {
+      "id": 38,
+      "raceId": 5,
+      "driverId": 7,
+      "teamId": 3,
+      "position": 6,
+      "points": 8,
+      "time": "78:55.719",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-06T13:02:15.390Z",
+      "updatedAt": "2025-11-06T13:02:15.390Z"
+    },
+    {
+      "id": 39,
+      "raceId": 5,
+      "driverId": 3,
+      "teamId": 2,
+      "position": 7,
+      "points": 6,
+      "time": "78:58.850",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-06T13:02:15.402Z",
+      "updatedAt": "2025-11-06T13:02:15.402Z"
+    },
+    {
+      "id": 40,
+      "raceId": 5,
+      "driverId": 4,
+      "teamId": 2,
+      "position": 8,
+      "points": 4,
+      "time": "79:20.789",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-06T13:02:15.413Z",
+      "updatedAt": "2025-11-06T13:02:15.413Z"
+    },
+    {
+      "id": 41,
+      "raceId": 5,
+      "driverId": 2,
+      "teamId": 1,
+      "position": 9,
+      "points": 2,
+      "time": "80:33.424",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-06T13:02:15.426Z",
+      "updatedAt": "2025-11-06T13:02:15.426Z"
+    },
+    {
+      "id": 42,
+      "raceId": 5,
+      "driverId": 1,
+      "teamId": 1,
+      "position": 10,
+      "points": 1,
+      "time": "80:34.124",
+      "fastestLap": "",
+      "penalty": "0s",
+      "createdAt": "2025-11-06T13:02:15.437Z",
+      "updatedAt": "2025-11-06T13:02:15.437Z"
+    }
+  ],
+  "penalties": [
+    {
+      "id": 1,
+      "type": "TimePenalty",
+      "value": "20",
+      "createdAt": "2025-10-31T09:18:16.394Z",
+      "updatedAt": "2025-10-31T09:18:16.394Z"
+    },
+    {
+      "id": 2,
+      "type": "GridPenalty",
+      "value": "10 places",
+      "createdAt": "2025-10-31T09:19:06.734Z",
+      "updatedAt": "2025-10-31T09:19:06.734Z"
+    },
+    {
+      "id": 3,
+      "type": "TimePenalty",
+      "value": "400",
+      "createdAt": "2025-10-31T09:37:13.175Z",
+      "updatedAt": "2025-10-31T09:37:13.175Z"
+    },
+    {
+      "id": 4,
+      "type": "TimePenalty",
+      "value": "20",
+      "createdAt": "2025-10-31T09:37:41.147Z",
+      "updatedAt": "2025-10-31T09:37:41.147Z"
+    },
+    {
+      "id": 5,
+      "type": "TimePenalty",
+      "value": "300",
+      "createdAt": "2025-10-31T09:38:19.149Z",
+      "updatedAt": "2025-10-31T09:38:19.149Z"
+    },
+    {
+      "id": 6,
+      "type": "TimePenalty",
+      "value": "50",
+      "createdAt": "2025-10-31T09:46:26.833Z",
+      "updatedAt": "2025-10-31T09:46:26.833Z"
+    },
+    {
+      "id": 7,
+      "type": "TimePenalty",
+      "value": "30",
+      "createdAt": "2025-10-31T09:46:48.352Z",
+      "updatedAt": "2025-10-31T09:46:48.352Z"
+    },
+    {
+      "id": 8,
+      "type": "TimePenalty",
+      "value": "777777",
+      "createdAt": "2025-11-05T15:41:23.578Z",
+      "updatedAt": "2025-11-05T15:41:23.578Z"
+    },
+    {
+      "id": 9,
+      "type": "TimePenalty",
+      "value": "400",
+      "createdAt": "2025-11-05T16:46:00.982Z",
+      "updatedAt": "2025-11-05T16:46:00.982Z"
+    },
+    {
+      "id": 10,
+      "type": "TimePenalty",
+      "value": "355",
+      "createdAt": "2025-11-05T16:47:59.419Z",
+      "updatedAt": "2025-11-05T16:47:59.419Z"
+    },
+    {
+      "id": 11,
+      "type": "Warning",
+      "value": "10",
+      "createdAt": "2025-11-06T12:24:14.706Z",
+      "updatedAt": "2025-11-06T12:24:14.706Z"
+    },
+    {
+      "id": 12,
+      "type": "TimePenalty",
+      "value": "10",
+      "createdAt": "2025-11-06T12:29:20.178Z",
+      "updatedAt": "2025-11-06T12:29:20.178Z"
+    },
+    {
+      "id": 13,
+      "type": "TimePenalty",
+      "value": "70",
+      "createdAt": "2025-11-06T13:08:28.607Z",
+      "updatedAt": "2025-11-06T13:08:28.607Z"
+    }
+  ],
+  "raceIncidents": [
+    {
+      "id": 1,
+      "raceId": 1,
+      "driverId": 8,
+      "lap": 17,
+      "description": "Ignoring Double Yellows",
+      "penaltyId": 1,
+      "createdAt": "2025-10-31T09:18:16.403Z",
+      "updatedAt": "2025-10-31T09:18:16.403Z"
+    },
+    {
+      "id": 2,
+      "raceId": 1,
+      "driverId": 9,
+      "lap": 18,
+      "description": "Ignoring Red Flag",
+      "penaltyId": 2,
+      "createdAt": "2025-10-31T09:19:06.738Z",
+      "updatedAt": "2025-10-31T09:19:06.738Z"
+    },
+    {
+      "id": 3,
+      "raceId": 1,
+      "driverId": 1,
+      "lap": 4,
+      "description": "Causing Collision",
+      "penaltyId": null,
+      "createdAt": "2025-10-31T09:19:39.426Z",
+      "updatedAt": "2025-10-31T09:19:39.426Z"
+    },
+    {
+      "id": 4,
+      "raceId": 2,
+      "driverId": 8,
+      "lap": 17,
+      "description": "Collision",
+      "penaltyId": 3,
+      "createdAt": "2025-10-31T09:37:13.190Z",
+      "updatedAt": "2025-10-31T09:37:13.190Z"
+    },
+    {
+      "id": 5,
+      "raceId": 2,
+      "driverId": 2,
+      "lap": 19,
+      "description": "False Start",
+      "penaltyId": 4,
+      "createdAt": "2025-10-31T09:37:41.155Z",
+      "updatedAt": "2025-10-31T09:37:41.155Z"
+    },
+    {
+      "id": 6,
+      "raceId": 2,
+      "driverId": 9,
+      "lap": 20,
+      "description": "Reckless Driving",
+      "penaltyId": 5,
+      "createdAt": "2025-10-31T09:38:19.155Z",
+      "updatedAt": "2025-10-31T09:38:19.155Z"
+    },
+    {
+      "id": 7,
+      "raceId": 3,
+      "driverId": 8,
+      "lap": 14,
+      "description": "Collision",
+      "penaltyId": 6,
+      "createdAt": "2025-10-31T09:46:26.865Z",
+      "updatedAt": "2025-10-31T09:46:26.865Z"
+    },
+    {
+      "id": 8,
+      "raceId": 3,
+      "driverId": 6,
+      "lap": 17,
+      "description": "Collision",
+      "penaltyId": 7,
+      "createdAt": "2025-10-31T09:46:48.360Z",
+      "updatedAt": "2025-10-31T09:46:48.360Z"
+    },
+    {
+      "id": 9,
+      "raceId": 3,
+      "driverId": 6,
+      "lap": 1,
+      "description": "tried to fly",
+      "penaltyId": 8,
+      "createdAt": "2025-11-05T15:41:23.583Z",
+      "updatedAt": "2025-11-05T15:41:23.583Z"
+    },
+    {
+      "id": 10,
+      "raceId": 3,
+      "driverId": 6,
+      "lap": 51,
+      "description": "racing incident",
+      "penaltyId": 9,
+      "createdAt": "2025-11-05T16:46:00.994Z",
+      "updatedAt": "2025-11-05T16:46:00.994Z"
+    },
+    {
+      "id": 11,
+      "raceId": 4,
+      "driverId": 8,
+      "lap": 3,
+      "description": "Collision",
+      "penaltyId": 10,
+      "createdAt": "2025-11-05T16:47:59.425Z",
+      "updatedAt": "2025-11-05T16:47:59.425Z"
+    },
+    {
+      "id": 12,
+      "raceId": 4,
+      "driverId": 2,
+      "lap": 15,
+      "description": "ahdakdlad",
+      "penaltyId": 11,
+      "createdAt": "2025-11-06T12:24:14.824Z",
+      "updatedAt": "2025-11-06T12:24:14.824Z"
+    },
+    {
+      "id": 13,
+      "raceId": 4,
+      "driverId": 4,
+      "lap": 7,
+      "description": "time",
+      "penaltyId": 12,
+      "createdAt": "2025-11-06T12:29:20.200Z",
+      "updatedAt": "2025-11-06T12:29:20.200Z"
+    },
+    {
+      "id": 14,
+      "raceId": 5,
+      "driverId": 7,
+      "lap": 6,
+      "description": "crash",
+      "penaltyId": 13,
+      "createdAt": "2025-11-06T13:08:28.625Z",
+      "updatedAt": "2025-11-06T13:08:28.625Z"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "username": "admin@f1control.com",
+      "role": "ADMIN",
+      "createdAt": "2025-10-31T08:50:07.332Z",
+      "updatedAt": "2025-10-31T08:50:07.332Z",
+      "passwordNote": "Passwords excluded for security. Default: password123"
+    },
+    {
+      "id": 2,
+      "username": "steward1",
+      "role": "STEWARD",
+      "createdAt": "2025-10-31T08:50:07.419Z",
+      "updatedAt": "2025-10-31T08:50:07.419Z",
+      "passwordNote": "Passwords excluded for security. Default: password123"
+    },
+    {
+      "id": 3,
+      "username": "steward2",
+      "role": "STEWARD",
+      "createdAt": "2025-10-31T08:50:07.423Z",
+      "updatedAt": "2025-10-31T08:50:07.423Z",
+      "passwordNote": "Passwords excluded for security. Default: password123"
+    }
+  ]
+}
