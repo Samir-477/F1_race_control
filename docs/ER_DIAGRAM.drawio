@@ -1,0 +1,209 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="F1 Race Control ER Diagram" id="f1-er-diagram">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Team Entity -->
+        <mxCell id="team" value="Team" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="160" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="team-attr" value="PK: id&#xa;name&#xa;fullName&#xa;base&#xa;teamChief&#xa;color" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="team">
+          <mxGeometry y="26" width="160" height="104" as="geometry" />
+        </mxCell>
+
+        <!-- Driver Entity -->
+        <mxCell id="driver" value="Driver" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="280" y="40" width="160" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="driver-attr" value="PK: id&#xa;FK: teamId&#xa;name&#xa;number&#xa;nationality&#xa;points&#xa;podiums" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="driver">
+          <mxGeometry y="26" width="160" height="104" as="geometry" />
+        </mxCell>
+
+        <!-- Car Entity -->
+        <mxCell id="car" value="Car" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="220" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="car-attr" value="PK: id&#xa;FK: teamId (unique)&#xa;model&#xa;engine&#xa;chassis" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="car">
+          <mxGeometry y="26" width="160" height="64" as="geometry" />
+        </mxCell>
+
+        <!-- Season Entity -->
+        <mxCell id="season" value="Season" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="520" y="40" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="season-attr" value="PK: id&#xa;year (unique)&#xa;name&#xa;isActive" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="season">
+          <mxGeometry y="26" width="160" height="64" as="geometry" />
+        </mxCell>
+
+        <!-- Circuit Entity -->
+        <mxCell id="circuit" value="Circuit" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="720" y="40" width="160" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="circuit-attr" value="PK: id&#xa;name (unique)&#xa;location&#xa;country&#xa;length&#xa;laps" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="circuit">
+          <mxGeometry y="26" width="160" height="84" as="geometry" />
+        </mxCell>
+
+        <!-- Race Entity -->
+        <mxCell id="race" value="Race" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="520" y="220" width="160" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="race-attr" value="PK: id&#xa;FK: circuitId&#xa;FK: seasonId&#xa;FK: reviewedById&#xa;name&#xa;date&#xa;status&#xa;isReviewed" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="race">
+          <mxGeometry y="26" width="160" height="104" as="geometry" />
+        </mxCell>
+
+        <!-- RaceResult Entity -->
+        <mxCell id="result" value="RaceResult" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="280" y="220" width="160" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="result-attr" value="PK: id&#xa;FK: raceId&#xa;FK: driverId&#xa;FK: teamId&#xa;position&#xa;time&#xa;points&#xa;penalty&#xa;fastestLap" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="result">
+          <mxGeometry y="26" width="160" height="104" as="geometry" />
+        </mxCell>
+
+        <!-- RaceIncident Entity -->
+        <mxCell id="incident" value="RaceIncident" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="520" y="420" width="160" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="incident-attr" value="PK: id&#xa;FK: raceId&#xa;FK: driverId&#xa;FK: penaltyId&#xa;lap&#xa;description" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="incident">
+          <mxGeometry y="26" width="160" height="84" as="geometry" />
+        </mxCell>
+
+        <!-- Penalty Entity -->
+        <mxCell id="penalty" value="Penalty" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="720" y="420" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="penalty-attr" value="PK: id&#xa;type&#xa;value" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="penalty">
+          <mxGeometry y="26" width="160" height="64" as="geometry" />
+        </mxCell>
+
+        <!-- User Entity -->
+        <mxCell id="user" value="User" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="720" y="220" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="user-attr" value="PK: id&#xa;username (unique)&#xa;password&#xa;role" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="user">
+          <mxGeometry y="26" width="160" height="64" as="geometry" />
+        </mxCell>
+
+        <!-- RaceLog Entity -->
+        <mxCell id="log" value="RaceLog" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="280" y="420" width="160" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="log-attr" value="PK: id&#xa;FK: raceId&#xa;FK: driverId (optional)&#xa;FK: teamId (optional)&#xa;lap&#xa;description&#xa;severity" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="log">
+          <mxGeometry y="26" width="160" height="84" as="geometry" />
+        </mxCell>
+
+        <!-- Relationships -->
+        
+        <!-- Team to Driver (1:N) -->
+        <mxCell id="rel1" value="" style="endArrow=ERmany;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="team-attr" target="driver-attr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel1-label" value="has" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="rel1">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Team to Car (1:1) -->
+        <mxCell id="rel2" value="" style="endArrow=ERone;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="team" target="car">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel2-label" value="has" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="rel2">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Season to Race (1:N) -->
+        <mxCell id="rel3" value="" style="endArrow=ERmany;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="season" target="race">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel3-label" value="contains" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="rel3">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Circuit to Race (1:N) -->
+        <mxCell id="rel4" value="" style="endArrow=ERmany;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="circuit-attr" target="race">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel4-label" value="hosts" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="rel4">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Race to RaceResult (1:N) -->
+        <mxCell id="rel5" value="" style="endArrow=ERmany;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="race-attr" target="result-attr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel5-label" value="has" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="rel5">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Driver to RaceResult (1:N) -->
+        <mxCell id="rel6" value="" style="endArrow=ERmany;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="driver" target="result">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel6-label" value="achieves" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="rel6">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Race to RaceIncident (1:N) -->
+        <mxCell id="rel7" value="" style="endArrow=ERmany;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="race" target="incident">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel7-label" value="has" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="rel7">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- RaceIncident to Penalty (1:1) -->
+        <mxCell id="rel8" value="" style="endArrow=ERone;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="incident-attr" target="penalty-attr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel8-label" value="may have" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="rel8">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- User to Race (1:N) -->
+        <mxCell id="rel9" value="" style="endArrow=ERmany;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endFill=0;dashed=1;" edge="1" parent="1" source="user-attr" target="race">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel9-label" value="reviews" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="rel9">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Race to RaceLog (1:N) -->
+        <mxCell id="rel10" value="" style="endArrow=ERmany;html=1;rounded=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="race" target="log">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel10-label" value="logs" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="rel10">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend" value="Legend" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="380" width="160" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-text" value="Blue: Team/Driver&#xa;Yellow: Season/Circuit&#xa;Purple: Race/Log&#xa;Red: Results/Incidents&#xa;Green: User&#xa;&#xa;PK = Primary Key&#xa;FK = Foreign Key" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="legend">
+          <mxGeometry y="26" width="160" height="124" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -32,6 +32,60 @@ router.get('/seasons', async (req, res) => {
   }
 });
 
+// Get all drivers
+router.get('/drivers', async (req, res) => {
+  try {
+    const drivers = await prisma.driver.findMany({
+      include: {
+        team: true
+      },
+      orderBy: { name: 'asc' }
+    });
+    res.json(drivers);
+  } catch (error) {
+    console.error('Get drivers error:', error);
+    res.status(500).json({ error: 'Failed to fetch drivers' });
+  }
+});
+
+// Get driver race results
+router.get('/drivers/:id/race-results', async (req, res) => {
+  try {
+    const driverId = parseInt(req.params.id);
+    const { seasonId } = req.query;
+    
+    const where = { driverId };
+    if (seasonId) {
+      where.race = {
+        seasonId: parseInt(seasonId)
+      };
+    }
+    
+    const results = await prisma.raceResult.findMany({
+      where,
+      include: {
+        race: {
+          include: {
+            circuit: true,
+            season: true
+          }
+        },
+        team: true
+      },
+      orderBy: {
+        race: {
+          date: 'desc'
+        }
+      }
+    });
+    
+    res.json(results);
+  } catch (error) {
+    console.error('Get driver race results error:', error);
+    res.status(500).json({ error: 'Failed to fetch driver race results' });
+  }
+});
+
 // Get all races with filters
 router.get('/races', async (req, res) => {
   try {

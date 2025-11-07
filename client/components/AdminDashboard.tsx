@@ -10,6 +10,7 @@ import TeamPerformance from './TeamPerformance';
 import TriggerManagement from './TriggerManagement';
 import PenaltyStatistics from './PenaltyStatistics';
 import DriversWithIncidents from './DriversWithIncidents';
+import DriverRatings from './DriverRatings';
 
 // Sub-components for the Team Editor
 const EditorTabButton: React.FC<{ active: boolean; onClick: () => void; children: React.ReactNode }> = ({ active, onClick, children }) => (
@@ -313,7 +314,7 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => vo
 
 
 const AdminDashboard: React.FC = () => {
-  const [activeView, setActiveView] = useState<'teams' | 'stewards'>('teams');
+  const [activeView, setActiveView] = useState<'teams' | 'stewards' | 'races' | 'championship' | 'race-report' | 'triggers' | 'penalties' | 'incidents' | 'driver-ratings'>('teams');
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
@@ -375,6 +376,10 @@ const AdminDashboard: React.FC = () => {
 
     if (activeView === 'incidents') {
       return <DriversWithIncidents />;
+    }
+
+    if (activeView === 'driver-ratings') {
+      return <DriverRatings />;
     }
 
     // Team Management View
@@ -454,6 +459,7 @@ const AdminDashboard: React.FC = () => {
               
               <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-2 mt-4">Database Features</div>
               <SidebarButton viewName="triggers" label="Trigger Management" />
+              <SidebarButton viewName="driver-ratings" label="Driver Ratings" />
             </nav>
           </aside>
           <main className="flex-1">

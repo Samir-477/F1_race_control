@@ -1,99 +1,124 @@
 -- =====================================================
--- MANUAL SQL SETUP FOR PROCEDURES AND FUNCTIONS
+-- F1 RACE CONTROL - DATABASE OBJECTS
 -- =====================================================
--- Run this file manually in MySQL Workbench or command line
--- These cannot be created via Prisma migrations due to DELIMITER requirements
+-- This file contains all stored procedures, functions, and triggers
+-- Run this file in MySQL Workbench after setting up the database schema
+-- 
+-- Contents:
+-- 1. Triggers (3) - Auto-created via Prisma migration
+-- 2. Stored Procedures (2) - Must be created manually
+-- 3. Functions (2) - Must be created manually
+-- =====================================================
 
 USE race_control;
 
 -- =====================================================
--- STORED PROCEDURES
+-- SECTION 1: TRIGGERS
+-- =====================================================
+-- Note: These are already created via Prisma migration
+-- (20251030131400_add_triggers_procedures_functions)
+-- Listed here for reference only - DO NOT RUN THIS SECTION
+
+/*
+-- Trigger 1: Auto-update driver points when race result is inserted
+CREATE TRIGGER after_race_result_insert
+AFTER INSERT ON RaceResult
+FOR EACH ROW
+UPDATE Driver
+SET points = points + NEW.points
+WHERE id = NEW.driverId;
+
+-- Trigger 2: Auto-update driver points when race result is updated
+CREATE TRIGGER after_race_result_update
+AFTER UPDATE ON RaceResult
+FOR EACH ROW
+UPDATE Driver
+SET points = points - OLD.points + NEW.points
+WHERE id = NEW.driverId;
+
+-- Trigger 3: Auto-log penalty assignments for audit trail
+CREATE TRIGGER after_penalty_assignment_insert
+AFTER INSERT ON PenaltyAssignment
+FOR EACH ROW
+INSERT INTO RaceLog (raceId, lap, description, severity, timestamp, createdAt, updatedAt)
+SELECT 
+    ri.raceId,
+    ri.lap,
+    CONCAT('Penalty assigned by steward to driver for incident on lap ', ri.lap),
+    'WARNING',
+    NOW(),
+    NOW(),
+    NOW()
+FROM RaceIncident ri
+WHERE ri.id = NEW.incidentId;
+*/
+
+-- =====================================================
+-- SECTION 2: STORED PROCEDURES
 -- =====================================================
 
 -- Drop existing procedures if they exist
 DROP PROCEDURE IF EXISTS CalculateChampionshipStandings;
 DROP PROCEDURE IF EXISTS GenerateRaceReport;
 
--- Procedure 1: Calculate Championship Standings
 DELIMITER $$
 
+-- Procedure 1: Calculate Championship Standings
 CREATE PROCEDURE CalculateChampionshipStandings(
-    IN p_seasonId INT,
-    IN p_type VARCHAR(10)
+    IN p_seasonId INT
 )
 BEGIN
-    IF p_type = 'driver' THEN
-        -- Driver Championship Standings
-        SELECT 
-            d.id,
-            d.name AS driverName,
-            d.number,
-            t.name AS teamName,
-            t.color AS teamColor,
-            SUM(rr.points) AS totalPoints,
-            COUNT(CASE WHEN rr.position = 1 THEN 1 END) AS wins,
-            COUNT(CASE WHEN rr.position <= 3 THEN 1 END) AS podiums,
-            COUNT(rr.id) AS racesParticipated
-        FROM Driver d
-        INNER JOIN Team t ON d.teamId = t.id
-        INNER JOIN RaceResult rr ON d.id = rr.driverId
-        INNER JOIN Race r ON rr.raceId = r.id
-        WHERE r.seasonId = p_seasonId
-        GROUP BY d.id, d.name, d.number, t.name, t.color
-        ORDER BY totalPoints DESC, wins DESC, podiums DESC;
-    ELSE
-        -- Team Championship Standings
-        SELECT 
-            t.id,
-            t.name AS teamName,
-            t.fullName,
-            t.color,
-            SUM(rr.points) AS totalPoints,
-            COUNT(CASE WHEN rr.position = 1 THEN 1 END) AS wins,
-            COUNT(CASE WHEN rr.position <= 3 THEN 1 END) AS podiums,
-            COUNT(DISTINCT r.id) AS racesParticipated
-        FROM Team t
-        INNER JOIN RaceResult rr ON t.id = rr.teamId
-        INNER JOIN Race r ON rr.raceId = r.id
-        WHERE r.seasonId = p_seasonId
-        GROUP BY t.id, t.name, t.fullName, t.color
-        ORDER BY totalPoints DESC, wins DESC, podiums DESC;
-    END IF;
+    SELECT 
+        d.id AS driverId,
+        d.name AS driverName,
+        d.number AS driverNumber,
+        t.id AS teamId,
+        t.name AS teamName,
+        t.color AS teamColor,
+        SUM(rr.points) AS totalPoints,
+        COUNT(rr.id) AS racesParticipated,
+        COUNT(CASE WHEN rr.position = 1 THEN 1 END) AS wins,
+        COUNT(CASE WHEN rr.position <= 3 THEN 1 END) AS podiums,
+        AVG(rr.position) AS avgPosition
+    FROM Driver d
+    INNER JOIN Team t ON d.teamId = t.id
+    LEFT JOIN RaceResult rr ON d.id = rr.driverId
+    LEFT JOIN Race r ON rr.raceId = r.id
+    WHERE r.seasonId = p_seasonId OR r.seasonId IS NULL
+    GROUP BY d.id, d.name, d.number, t.id, t.name, t.color
+    ORDER BY totalPoints DESC, wins DESC, podiums DESC;
 END$$
 
--- Procedure 2: Generate Comprehensive Race Report
-CREATE PROCEDURE GenerateRaceReport(IN p_raceId INT)
+-- Procedure 2: Generate Race Report
+CREATE PROCEDURE GenerateRaceReport(
+    IN p_raceId INT
+)
 BEGIN
-    -- Race Basic Info
+    -- Race basic info
     SELECT 
         r.id,
         r.name AS raceName,
         r.date,
         r.status,
         c.name AS circuitName,
-        c.location,
-        c.country,
+        c.location AS circuitLocation,
+        c.country AS circuitCountry,
         c.length AS circuitLength,
-        c.laps,
-        s.year AS season,
-        COUNT(DISTINCT rr.id) AS totalFinishers,
-        COUNT(DISTINCT ri.id) AS totalIncidents,
-        COUNT(DISTINCT pa.id) AS totalPenalties
+        c.laps AS totalLaps,
+        s.year AS seasonYear,
+        s.name AS seasonName
     FROM Race r
     INNER JOIN Circuit c ON r.circuitId = c.id
     INNER JOIN Season s ON r.seasonId = s.id
-    LEFT JOIN RaceResult rr ON r.id = rr.raceId
-    LEFT JOIN RaceIncident ri ON r.id = ri.raceId
-    LEFT JOIN PenaltyAssignment pa ON ri.id = pa.incidentId
-    WHERE r.id = p_raceId
-    GROUP BY r.id, r.name, r.date, r.status, c.name, c.location, c.country, c.length, c.laps, s.year;
-
-    -- Race Results
+    WHERE r.id = p_raceId;
+    
+    -- Race results
     SELECT 
         rr.position,
         d.name AS driverName,
-        d.number,
+        d.number AS driverNumber,
         t.name AS teamName,
+        t.color AS teamColor,
         rr.time,
         rr.points,
         rr.penalty,
@@ -102,32 +127,41 @@ BEGIN
     INNER JOIN Driver d ON rr.driverId = d.id
     INNER JOIN Team t ON rr.teamId = t.id
     WHERE rr.raceId = p_raceId
-    ORDER BY rr.position;
-
-    -- Incidents and Penalties
+    ORDER BY rr.position ASC;
+    
+    -- Race incidents
     SELECT 
         ri.lap,
-        d.name AS driverName,
-        t.name AS teamName,
         ri.description,
+        d.name AS driverName,
+        d.number AS driverNumber,
+        t.name AS teamName,
         p.type AS penaltyType,
-        p.value AS penaltyValue,
-        pa.status AS penaltyStatus,
-        u.username AS stewardName
+        p.value AS penaltyValue
     FROM RaceIncident ri
     INNER JOIN Driver d ON ri.driverId = d.id
     INNER JOIN Team t ON d.teamId = t.id
     LEFT JOIN Penalty p ON ri.penaltyId = p.id
-    LEFT JOIN PenaltyAssignment pa ON ri.id = pa.incidentId
-    LEFT JOIN User u ON pa.stewardId = u.id
     WHERE ri.raceId = p_raceId
-    ORDER BY ri.lap;
+    ORDER BY ri.lap ASC;
+    
+    -- Race statistics
+    SELECT 
+        COUNT(DISTINCT rr.driverId) AS totalDrivers,
+        COUNT(DISTINCT rr.teamId) AS totalTeams,
+        COUNT(ri.id) AS totalIncidents,
+        COUNT(CASE WHEN ri.penaltyId IS NOT NULL THEN 1 END) AS penaltiesIssued,
+        MIN(rr.time) AS fastestRaceTime,
+        MIN(rr.fastestLap) AS fastestLap
+    FROM RaceResult rr
+    LEFT JOIN RaceIncident ri ON ri.raceId = rr.raceId
+    WHERE rr.raceId = p_raceId;
 END$$
 
 DELIMITER ;
 
 -- =====================================================
--- FUNCTIONS
+-- SECTION 3: FUNCTIONS
 -- =====================================================
 
 -- Drop existing functions if they exist
@@ -224,6 +258,7 @@ BEGIN
     WHERE ri.driverId = p_driverId AND r.seasonId = p_seasonId;
     
     -- Calculate rating (0-100 scale)
+    -- Formula: (Points × 2) + (Wins × 10) + (Podiums × 5) - (Avg Position × 2) - (Incidents × 3)
     SET rating = (totalPoints * 2) + (wins * 10) + (podiums * 5) - (avgPosition * 2) - (incidents * 3);
     
     -- Normalize to 0-100
@@ -242,13 +277,34 @@ DELIMITER ;
 -- VERIFICATION
 -- =====================================================
 
--- Verify procedures were created
+-- Check created procedures
 SHOW PROCEDURE STATUS WHERE Db = 'race_control';
 
--- Verify functions were created
+-- Check created functions
 SHOW FUNCTION STATUS WHERE Db = 'race_control';
 
--- Test procedure (optional)
--- CALL CalculateChampionshipStandings(1, 'driver');
+-- Check existing triggers (created via migration)
+SHOW TRIGGERS FROM race_control;
 
-SELECT 'Setup complete! Procedures and functions created successfully.' AS Status;
+-- =====================================================
+-- TESTING (Optional)
+-- =====================================================
+
+-- Test Procedure 1: Championship Standings
+-- CALL CalculateChampionshipStandings(1);
+
+-- Test Procedure 2: Race Report
+-- CALL GenerateRaceReport(1);
+
+-- Test Function 1: Race Time with Penalties
+-- SELECT CalculateRaceTimeWithPenalties(1, 1) AS totalTime;
+
+-- Test Function 2: Driver Performance Rating
+-- SELECT GetDriverPerformanceRating(1, 1) AS rating;
+
+-- =====================================================
+-- END OF FILE
+-- =====================================================
+
+SELECT '✅ Database objects script completed!' AS Status;
+SELECT 'Run the verification queries above to confirm all objects were created.' AS NextStep;
