@@ -5,6 +5,7 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>F1 Race Control</title>
+    <link rel="stylesheet" href="https://unpkg.com/sheryjs/dist/Shery.css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,13 +21,253 @@
     }
     </script>
     <style>
-      body {
-        font-family: 'Titillium Web', sans-serif;
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: 'Titillium Web', sans-serif; background: #111827; color: white; }
+
+      /* ── Hero section ── */
+      #hero-section { width: 100%; height: 100vh; position: relative; }
+      #main         { width: 100%; height: 100vh; position: relative; }
+      #back         { width: 100%; height: 100vh; }
+      #back img     { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+      #top {
+        pointer-events: none;
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100vh;
+        z-index: 100;
       }
+      #hero-overlay {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 1;
+      }
+      #hero-content {
+        position: relative; z-index: 2;
+        width: 90%; max-width: 1280px;
+        margin: 0 auto; height: 100%;
+        display: flex; align-items: center;
+      }
+      #hero-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: center;
+      }
+
+      /* Text cycling rows */
+      .elem {
+        position: relative;
+        height: 7.5vw;
+        overflow: hidden;
+      }
+      .elem h1 {
+        position: absolute;
+        top: 100%; left: 0;
+        font-size: 7.5vw;
+        font-weight: 900;
+        line-height: 1;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .elem h1:first-child { top: 0; }
+
+      .elem-outline h1 {
+        color: transparent;
+        -webkit-text-stroke: 2px white;
+      }
+      .elem-solid h1 { color: white; }
+
+      #explore-btn {
+        pointer-events: all;
+        margin-top: 2rem;
+        padding: 0.75rem 2rem;
+        font-size: 1.25rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: white;
+        color: black;
+        border: 2px solid white;
+        cursor: pointer;
+        font-family: 'Titillium Web', sans-serif;
+        transition: background 0.3s, color 0.3s;
+      }
+      #explore-btn:hover { background: transparent; color: white; }
+
+      /* Right panel */
+      #hero-right {
+        color: white;
+        display: flex; flex-direction: column; align-items: flex-start;
+      }
+      #hero-right h3 { font-size: 1.875rem; font-weight: 700; }
+      #hero-right .role { color: #9ca3af; margin-top: 0.5rem; font-size: 0.875rem; }
+      #hero-right .divider { width: 25%; border-top: 1px solid rgba(255,255,255,0.3); margin: 1.5rem 0; }
+      #hero-right p { color: #d1d5db; font-size: 1rem; line-height: 1.6; }
     </style>
   </head>
-  <body class="bg-gray-900 text-white">
+  <body>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         HERO SECTION — fully outside React, owned by Shery.js + GSAP
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div id="hero-section">
+      <div id="main">
+
+        <!-- Images: Shery.js will process these -->
+        <div id="back">
+          <img src="/images/red_bull.png"  alt="Red Bull"  />
+          <img src="/images/mclearn.png"   alt="McLaren"   />
+          <img src="/images/Ferrari.png"   alt="Ferrari"   />
+          <img src="/images/mercedes.png"  alt="Mercedes"  />
+        </div>
+
+        <!-- Overlay + text content -->
+        <div id="top">
+          <div id="hero-overlay"></div>
+          <div id="hero-content">
+            <div id="hero-grid">
+
+              <!-- Left: cycling team names -->
+              <div>
+                <div class="elem elem-outline">
+                  <h1>ORACLE</h1>
+                  <h1>GOOGLE</h1>
+                  <h1>SCUDERIA</h1>
+                  <h1>PETRONAS</h1>
+                </div>
+                <div class="elem elem-solid">
+                  <h1>RED BULL</h1>
+                  <h1>MCLAREN</h1>
+                  <h1>FERRARI</h1>
+                  <h1>MERCEDES</h1>
+                </div>
+                <button id="explore-btn">Explore Now</button>
+              </div>
+
+              <!-- Right: driver info (updated via JS on team change) -->
+              <div id="hero-right">
+                <h3 id="driver-name">Max Verstappen</h3>
+                <p class="role">Top Performer</p>
+                <div class="divider"></div>
+                <p id="team-desc">Oracle Red Bull Racing is a Formula One racing team, racing under an Austrian licence and based in the United Kingdom.</p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- React root: header + dashboard + scroll sections -->
     <div id="root"></div>
+
+    <!-- ── CDN scripts (same stack as working Moist project) ── -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.155.0/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/automat/controlkit.js@master/bin/controlKit.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/sheryjs/dist/Shery.js"></script>
+
     <script type="module" src="./index.tsx"></script>
+
+    <!-- ── Shery.imageEffect + GSAP text cycling ── -->
+    <script>
+      // Team data for right-panel updates
+      var TEAMS = [
+        { driver: 'Max Verstappen',  desc: 'Oracle Red Bull Racing is a Formula One racing team, racing under an Austrian licence and based in the United Kingdom.' },
+        { driver: 'Lando Norris',    desc: 'McLaren Racing Limited is a British motor racing team based at the McLaren Technology Centre in Woking, Surrey, England.' },
+        { driver: 'Charles Leclerc', desc: 'Scuderia Ferrari is the racing division of luxury Italian auto manufacturer Ferrari and the racing team that competes in Formula One racing.' },
+        { driver: 'George Russell',  desc: 'The Mercedes-AMG Petronas Formula One Team is the works team of Mercedes-Benz, competing in the FIA Formula One World Championship.' },
+      ];
+
+      var teamIdx  = 0;
+      var clicking = false;
+
+      // ── GSAP text cycling (same pattern as Moist) ──
+      var elems = document.querySelectorAll('.elem');
+
+      document.getElementById('main').addEventListener('click', function () {
+        if (clicking) return;
+        clicking = true;
+
+        var cur = teamIdx;
+        var nxt = (teamIdx + 1) % TEAMS.length;
+        teamIdx = nxt;
+
+        // Left changes first — right follows with a slight lag
+        gsap.to(['#driver-name', '#team-desc'], {
+          opacity: 0, y: -16,
+          duration: 0.3, ease: 'power2.in', stagger: 0.05,
+          delay: 0.25,
+        });
+        setTimeout(function () {
+          document.getElementById('driver-name').textContent = TEAMS[nxt].driver;
+          document.getElementById('team-desc').textContent   = TEAMS[nxt].desc;
+          gsap.fromTo(
+            ['#driver-name', '#team-desc'],
+            { opacity: 0, y: 16 },
+            { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out', stagger: 0.08 }
+          );
+        }, 750);
+
+        elems.forEach(function (elem) {
+          var h1s = elem.querySelectorAll('h1');
+
+          gsap.to(h1s[cur], {
+            top: '-=100%',
+            ease: 'expo.inOut',
+            duration: 1,
+            onComplete: function () {
+              gsap.set(h1s[cur], { top: '100%' });
+              clicking = false;
+            },
+          });
+          gsap.to(h1s[nxt], {
+            top: '-=100%',
+            ease: 'expo.inOut',
+            duration: 1,
+          });
+        });
+      });
+
+      // Explore Now → scroll to React scroll sections
+      document.getElementById('explore-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        var target = document.getElementById('explore-section');
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      });
+
+      // ── Shery.imageEffect — initialise once Shery + images are ready ──
+      (function poll() {
+        if (!window.Shery) return setTimeout(poll, 200);
+        Shery.imageEffect('#back', {
+          style: 5,
+          config: {
+            a:                   { value: 2,     range: [0, 30]   },
+            b:                   { value: 0.75,  range: [-1, 1]   },
+            aspect:              { value: 1.9825834542815675       },
+            gooey:               { value: true                     },
+            infiniteGooey:       { value: true                     },
+            durationOut:         { value: 1,     range: [0.1, 5]  },
+            durationIn:          { value: 1.5,   range: [0.1, 5]  },
+            displaceAmount:      { value: 0.5                      },
+            masker:              { value: true                      },
+            maskVal:             { value: 1,     range: [1, 5]    },
+            scrollType:          { value: 0                         },
+            geoVertex:           { value: 1,     range: [1, 64]   },
+            noEffectGooey:       { value: false                     },
+            onMouse:             { value: 1                         },
+            noise_speed:         { value: 1.59,  range: [0, 10]   },
+            metaball:            { value: 0.21,  range: [0, 2]    },
+            discard_threshold:   { value: 0.5,   range: [0, 1]    },
+            antialias_threshold: { value: 0,     range: [0, 0.1]  },
+            noise_height:        { value: 0.45,  range: [0, 2]    },
+            noise_scale:         { value: 12.15, range: [0, 100]  },
+          },
+          gooey: true,
+        });
+      })();
+    </script>
   </body>
 </html>

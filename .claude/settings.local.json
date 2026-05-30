@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\samir\\\\OneDrive\\\\Desktop\\\\f1_extended\\\\F1_race_control\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "PowerShell(head -150)"
+    ]
+  }
+}

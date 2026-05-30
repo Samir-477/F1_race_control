@@ -40,6 +40,7 @@ export const TEAMS: Team[] = [
     color: 'bg-blue-900',
     textColor: 'text-red-500',
   backgroundImageUrl: '/images/red_bull.png',
+  backgroundPosition: 'center center',
   },
   {
     id: 2,
@@ -54,7 +55,8 @@ export const TEAMS: Team[] = [
     sponsors: [google],
     color: 'bg-orange-500',
     textColor: 'text-blue-400',
-  backgroundImageUrl: '/images/mclearn.jpg',
+  backgroundImageUrl: '/images/mclearn.png',
+  backgroundPosition: 'center 30%',
   },
   {
     id: 3,
@@ -70,6 +72,7 @@ export const TEAMS: Team[] = [
     color: 'bg-red-600',
     textColor: 'text-yellow-400',
   backgroundImageUrl: '/images/Ferrari.png',
+  backgroundPosition: 'center center',
   },
   {
     id: 4,
@@ -84,7 +87,8 @@ export const TEAMS: Team[] = [
     sponsors: [petronas],
     color: 'bg-teal-500',
     textColor: 'text-black',
-  backgroundImageUrl: '/images/mercdes.png',
+  backgroundImageUrl: '/images/mercedes.png',
+  backgroundPosition: 'center 35%',
   },
 ];
 

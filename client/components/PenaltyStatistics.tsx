@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import API_URL from '../lib/config';
 import { BarChart3, Users, Shield, AlertTriangle } from 'lucide-react';
 
 interface DriverStats {
@@ -63,7 +64,7 @@ export default function PenaltyStatistics() {
   const fetchSeasons = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3002/api/seasons', {
+      const res = await fetch(`${API_URL}/api/seasons`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -84,21 +85,21 @@ export default function PenaltyStatistics() {
       
       if (view === 'driver') {
         const res = await fetch(
-          `http://localhost:3002/api/analytics/penalty-statistics/by-driver${seasonParam}`,
+          `${API_URL}/api/analytics/penalty-statistics/by-driver${seasonParam}`,
           { headers: { 'Authorization': `Bearer ${token}` } }
         );
         const data = await res.json();
         setDriverStats(data);
       } else if (view === 'team') {
         const res = await fetch(
-          `http://localhost:3002/api/analytics/penalty-statistics/by-team${seasonParam}`,
+          `${API_URL}/api/analytics/penalty-statistics/by-team${seasonParam}`,
           { headers: { 'Authorization': `Bearer ${token}` } }
         );
         const data = await res.json();
         setTeamStats(data);
       } else {
         const res = await fetch(
-          `http://localhost:3002/api/analytics/penalty-statistics/by-type${seasonParam}`,
+          `${API_URL}/api/analytics/penalty-statistics/by-type${seasonParam}`,
           { headers: { 'Authorization': `Bearer ${token}` } }
         );
         const data = await res.json();

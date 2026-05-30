@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
+import API_URL from '../lib/config';
 import { Trophy, Medal, Award, Calendar } from 'lucide-react';
 
 interface RaceResult {
@@ -87,7 +88,7 @@ export default function RaceResultsView() {
   const fetchRaces = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3002/api/races', {
+      const response = await fetch(`${API_URL}/api/races`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       const data = await response.json();
@@ -103,7 +104,7 @@ export default function RaceResultsView() {
   const fetchSeasons = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3002/api/seasons', {
+      const response = await fetch(`${API_URL}/api/seasons`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       const data = await response.json();
@@ -125,7 +126,7 @@ export default function RaceResultsView() {
 
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:3002/api/races/${selectedRace}/results`,
+        `${API_URL}/api/races/${selectedRace}/results`,
         {
           headers: { 'Authorization': `Bearer ${token}` },
         }
@@ -154,7 +155,7 @@ export default function RaceResultsView() {
 
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:3002/api/analytics/championship-standings/${selectedSeason}/${championshipType}`,
+        `${API_URL}/api/analytics/championship-standings/${selectedSeason}/${championshipType}`,
         {
           headers: { 'Authorization': `Bearer ${token}` },
         }

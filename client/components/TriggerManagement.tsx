@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import API_URL from '../lib/config';
 import { Zap, Database, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface Trigger {
@@ -41,7 +42,7 @@ export default function TriggerManagement() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3002/api/analytics/triggers', {
+      const res = await fetch(`${API_URL}/api/analytics/triggers`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -60,7 +61,7 @@ export default function TriggerManagement() {
   const fetchTriggerLogs = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3002/api/analytics/trigger-logs', {
+      const res = await fetch(`${API_URL}/api/analytics/trigger-logs`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       

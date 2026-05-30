@@ -42,8 +42,9 @@ enum LogSeverity {
 model User {
   id        Int      @id @default(autoincrement())
   username  String   @unique
-  password  String   // In a real application, this should be a hashed value.
+  password  String
   role      UserRole
+  isDemo    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

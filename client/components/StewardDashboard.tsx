@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import API_URL from '../lib/config';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import RaceMonitoringView from './RaceMonitoringView';
@@ -109,14 +110,14 @@ const StewardDashboard: React.FC = () => {
       const headers = { 'Authorization': `Bearer ${token}` };
 
       // Fetch all races
-      const allRacesRes = await fetch('http://localhost:3002/api/races', { headers });
+      const allRacesRes = await fetch(`${API_URL}/api/races`, { headers });
       if (allRacesRes.ok) {
         const races = await allRacesRes.json();
         setAllRaces(races);
       }
 
       // Fetch current race
-      const raceRes = await fetch('http://localhost:3002/api/races/active', { headers });
+      const raceRes = await fetch(`${API_URL}/api/races/active`, { headers });
       if (raceRes.ok) {
         const race = await raceRes.json();
         setCurrentRace(race);
@@ -124,8 +125,8 @@ const StewardDashboard: React.FC = () => {
         // Fetch race logs and incidents
         if (race) {
           const [logsRes, incidentsRes] = await Promise.all([
-            fetch(`http://localhost:3002/api/races/${race.id}/logs`, { headers }),
-            fetch(`http://localhost:3002/api/races/${race.id}/incidents`, { headers })
+            fetch(`${API_URL}/api/races/${race.id}/logs`, { headers }),
+            fetch(`${API_URL}/api/races/${race.id}/incidents`, { headers })
           ]);
           
           if (logsRes.ok) setRaceLogs(await logsRes.json());
@@ -137,7 +138,7 @@ const StewardDashboard: React.FC = () => {
       }
 
       // Fetch race history
-      const historyRes = await fetch('http://localhost:3002/api/steward/history', { headers });
+      const historyRes = await fetch(`${API_URL}/api/steward/history`, { headers });
       if (historyRes.ok) {
         setRaceHistory(await historyRes.json());
       }
@@ -156,7 +157,7 @@ const StewardDashboard: React.FC = () => {
     try {
       setIsGeneratingLogs(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3002/api/races/${currentRace.id}/generate-logs`, {
+      const response = await fetch(`${API_URL}/api/races/${currentRace.id}/generate-logs`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -181,7 +182,7 @@ const StewardDashboard: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3002/api/races/${currentRace.id}/incidents`, {
+      const response = await fetch(`${API_URL}/api/races/${currentRace.id}/incidents`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -209,7 +210,7 @@ const StewardDashboard: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3002/api/races/${currentRace.id}/logs`, {
+      const response = await fetch(`${API_URL}/api/races/${currentRace.id}/logs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -235,7 +236,7 @@ const StewardDashboard: React.FC = () => {
   const handleAssignPenalty = async (incidentId: number, penaltyType: string, penaltyValue: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3002/api/incidents/${incidentId}/penalties`, {
+      const response = await fetch(`${API_URL}/api/incidents/${incidentId}/penalties`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -260,7 +261,7 @@ const StewardDashboard: React.FC = () => {
   const handleApprovePenalty = async (assignmentId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3002/api/penalties/${assignmentId}/approve`, {
+      const response = await fetch(`${API_URL}/api/penalties/${assignmentId}/approve`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -296,52 +297,56 @@ const StewardDashboard: React.FC = () => {
       const completedRaces = allRaces.filter(race => race.status === 'COMPLETED');
       
       return (
-        <div className="bg-[#161b22] p-6 rounded-lg border border-gray-700">
-          <h2 className="text-3xl font-bold mb-6">Race History</h2>
-          
+        <div className="bg-[#161b22] rounded-lg border border-gray-700/60">
+          <div className="px-6 py-5 border-b border-gray-700/60 flex items-center gap-3">
+            <div className="w-1 h-6 bg-yellow-500 rounded-full"></div>
+            <h2 className="text-xl font-bold tracking-wide uppercase">Race History</h2>
+          </div>
+
           {completedRaces.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-400 text-lg">No completed races found</p>
-              <p className="text-gray-500 text-sm mt-2">Completed races will appear here</p>
+            <div className="text-center py-16">
+              <div className="text-5xl mb-4 opacity-20">🏁</div>
+              <p className="text-gray-400 font-semibold">No completed races yet</p>
+              <p className="text-gray-600 text-sm mt-1">Completed races will appear here</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-700">
-                    <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Race Name</th>
-                    <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Circuit</th>
-                    <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Date</th>
-                    <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Season</th>
-                    <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Status</th>
-                    <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Action</th>
+                  <tr className="border-b border-gray-700/60">
+                    <th className="text-left py-3 px-6 text-gray-500 font-semibold text-xs uppercase tracking-widest">Race</th>
+                    <th className="text-left py-3 px-4 text-gray-500 font-semibold text-xs uppercase tracking-widest">Circuit</th>
+                    <th className="text-left py-3 px-4 text-gray-500 font-semibold text-xs uppercase tracking-widest">Date</th>
+                    <th className="text-left py-3 px-4 text-gray-500 font-semibold text-xs uppercase tracking-widest">Season</th>
+                    <th className="text-left py-3 px-4 text-gray-500 font-semibold text-xs uppercase tracking-widest">Status</th>
+                    <th className="text-right py-3 px-6 text-gray-500 font-semibold text-xs uppercase tracking-widest">Action</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-800/60">
                   {completedRaces.map(race => (
-                    <tr key={race.id} className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
-                      <td className="py-4 px-4 text-white font-medium">{race.name}</td>
-                      <td className="py-4 px-4 text-gray-300">{race.circuit.name}</td>
-                      <td className="py-4 px-4 text-gray-300">{new Date(race.date).toLocaleDateString()}</td>
-                      <td className="py-4 px-4 text-gray-300">{race.season.year}</td>
+                    <tr key={race.id} className="hover:bg-white/[0.02] transition-colors group">
+                      <td className="py-4 px-6 font-semibold text-white">{race.name}</td>
+                      <td className="py-4 px-4 text-gray-400 text-sm">{race.circuit.name}</td>
+                      <td className="py-4 px-4 text-gray-400 text-sm">{new Date(race.date).toLocaleDateString()}</td>
+                      <td className="py-4 px-4 text-gray-400 text-sm">{race.season.year}</td>
                       <td className="py-4 px-4">
-                        <div className="flex gap-2 items-center">
-                          <span className="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                        <div className="flex flex-wrap gap-1.5 items-center">
+                          <span className="inline-flex items-center px-2 py-0.5 text-xs font-bold uppercase tracking-wide rounded-sm bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/30">
                             {race.status}
                           </span>
                           {race.isReviewed && (
-                            <span className="bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold uppercase tracking-wide rounded-sm bg-violet-500/10 text-violet-400 ring-1 ring-violet-500/30">
                               ✓ Reviewed
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-6 text-right">
                         <button
                           onClick={() => setSelectedRace(race)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all duration-200"
                         >
-                          View Details
+                          View Details →
                         </button>
                       </td>
                     </tr>
@@ -361,57 +366,58 @@ const StewardDashboard: React.FC = () => {
     );
 
     return (
-      <div className="bg-[#161b22] p-6 rounded-lg border border-gray-700">
-        <h2 className="text-3xl font-bold mb-6">Race Monitoring</h2>
-        
+      <div className="bg-[#161b22] rounded-lg border border-gray-700/60">
+        <div className="px-6 py-5 border-b border-gray-700/60 flex items-center gap-3">
+          <div className="w-1 h-6 bg-yellow-500 rounded-full"></div>
+          <h2 className="text-xl font-bold tracking-wide uppercase">Race Monitoring</h2>
+        </div>
+
         {monitoringRaces.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">No races to monitor</p>
-            <p className="text-gray-500 text-sm mt-2">All races have been reviewed or no races are available</p>
+          <div className="text-center py-16">
+            <div className="text-5xl mb-4 opacity-20">🏎</div>
+            <p className="text-gray-400 font-semibold">No races to monitor</p>
+            <p className="text-gray-600 text-sm mt-1">All races have been reviewed or no races are available</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-700">
-                  <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Race Name</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Circuit</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Date</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Status</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase">Action</th>
+                <tr className="border-b border-gray-700/60">
+                  <th className="text-left py-3 px-6 text-gray-500 font-semibold text-xs uppercase tracking-widest">Race</th>
+                  <th className="text-left py-3 px-4 text-gray-500 font-semibold text-xs uppercase tracking-widest">Circuit</th>
+                  <th className="text-left py-3 px-4 text-gray-500 font-semibold text-xs uppercase tracking-widest">Date</th>
+                  <th className="text-left py-3 px-4 text-gray-500 font-semibold text-xs uppercase tracking-widest">Status</th>
+                  <th className="text-right py-3 px-6 text-gray-500 font-semibold text-xs uppercase tracking-widest">Action</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-800/60">
                 {monitoringRaces.map((race) => {
                   const hasLogs = race.logs && race.logs.length > 0;
                   return (
-                    <tr
-                      key={race.id}
-                      className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors"
-                    >
-                      <td className="py-4 px-4 text-white font-medium">{race.name}</td>
-                      <td className="py-4 px-4 text-gray-300">{race.circuit.name}</td>
-                      <td className="py-4 px-4 text-gray-300">{new Date(race.date).toLocaleDateString()}</td>
+                    <tr key={race.id} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="py-4 px-6 font-semibold text-white">{race.name}</td>
+                      <td className="py-4 px-4 text-gray-400 text-sm">{race.circuit.name}</td>
+                      <td className="py-4 px-4 text-gray-400 text-sm">{new Date(race.date).toLocaleDateString()}</td>
                       <td className="py-4 px-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          race.status === 'COMPLETED' ? 'bg-green-600 text-white' :
-                          race.status === 'IN_PROGRESS' ? 'bg-yellow-600 text-black' :
-                          race.status === 'SCHEDULED' ? 'bg-blue-600 text-white' :
-                          'bg-gray-600 text-white'
+                        <span className={`inline-flex items-center px-2 py-0.5 text-xs font-bold uppercase tracking-wide rounded-sm ring-1 ${
+                          race.status === 'COMPLETED'   ? 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/30' :
+                          race.status === 'IN_PROGRESS' ? 'bg-amber-500/10 text-amber-400 ring-amber-500/30' :
+                          race.status === 'SCHEDULED'   ? 'bg-sky-500/10 text-sky-400 ring-sky-500/30' :
+                                                          'bg-gray-500/10 text-gray-400 ring-gray-500/30'
                         }`}>
                           {race.status}
                         </span>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-6 text-right">
                         <button
                           onClick={() => setSelectedRace(race)}
-                          className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border transition-all duration-200 ${
                             hasLogs
-                              ? 'bg-green-600 hover:bg-green-700 text-white'
-                              : 'bg-blue-600 hover:bg-blue-700 text-white'
+                              ? 'border-emerald-500/50 text-emerald-400 hover:bg-emerald-500 hover:text-black'
+                              : 'border-yellow-500/50 text-yellow-400 hover:bg-yellow-500 hover:text-black'
                           }`}
                         >
-                          {hasLogs ? 'View Race Log' : 'Generate Race Logs'}
+                          {hasLogs ? 'View Race Log →' : 'Generate Logs →'}
                         </button>
                       </td>
                     </tr>
@@ -428,7 +434,7 @@ const StewardDashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0d1117] px-4 sm:px-8 pb-8 text-gray-200 font-inter">
-        <div className="h-24"></div> {/* Spacer for fixed navbar */}
+        <div className="h-20"></div> {/* Spacer for fixed navbar */}
         <div className="max-w-7xl mx-auto">
           <p className="text-gray-400">Loading steward dashboard...</p>
         </div>
@@ -456,15 +462,28 @@ const StewardDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0d1117] px-4 sm:px-8 pb-8 text-gray-200 font-inter">
-      <div className="h-28"></div> {/* Spacer for fixed navbar */}
+      <div className="h-20"></div> {/* Spacer for fixed navbar */}
+      {user?.isDemo && (
+        <div className="-mx-4 sm:-mx-8 bg-yellow-500 text-black text-center text-sm font-bold py-2 tracking-wide mb-6">
+          DEMO MODE — Read Only. Actions are disabled.
+        </div>
+      )}
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-5xl font-black mb-12 uppercase tracking-wide">Steward Dashboard</h1>
-        
-        <div className="flex flex-col md:flex-row gap-8 md:items-start">
-          <aside className="md:w-1/3 lg:w-1/4 bg-[#161b22] p-4 rounded-lg border border-gray-700 self-stretch">
-            <nav className="flex flex-col gap-2">
-              <SidebarButton viewName="monitoring" label="Race Monitoring" />
-              <SidebarButton viewName="history" label="Race History" />
+        <div className="mb-10">
+          <p className="text-yellow-500 text-xs font-bold uppercase tracking-widest mb-1">FIA Race Control</p>
+          <h1 className="text-4xl font-black uppercase tracking-wide">Steward Dashboard</h1>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-6 md:items-start">
+          <aside className="md:w-56 lg:w-52 flex-shrink-0">
+            <nav className="bg-[#161b22] rounded-lg border border-gray-700/60 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-700/60">
+                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Navigation</p>
+              </div>
+              <div className="p-2 flex flex-col gap-1">
+                <SidebarButton viewName="monitoring" label="Race Monitoring" />
+                <SidebarButton viewName="history" label="Race History" />
+              </div>
             </nav>
           </aside>
           <main className="flex-1">

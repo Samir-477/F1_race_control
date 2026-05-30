@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import API_URL from '../lib/config';
 import RaceStandingsTable from './RaceStandingsTable';
 import IncidentReviewPanel from './IncidentReviewPanel';
 import AddIncidentModal, { IncidentFormData } from './AddIncidentModal';
 import ConfirmationModal from './ConfirmationModal';
 import toast from 'react-hot-toast';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Race {
   id: number;
@@ -27,7 +29,20 @@ interface RaceMonitoringViewProps {
   onReview?: () => void;
 }
 
+const demoToast = () => toast.custom((t) => (
+  <div className="bg-[#1f2937] border border-yellow-500/40 rounded-lg p-4 shadow-xl flex items-start gap-3 max-w-xs">
+    <span className="text-yellow-400 text-lg mt-0.5">🔒</span>
+    <div className="flex-1">
+      <p className="text-white font-bold text-sm">Demo Account</p>
+      <p className="text-gray-400 text-xs mt-0.5">Log in as admin or steward to make changes.</p>
+    </div>
+    <button onClick={() => toast.dismiss(t.id)} className="text-gray-500 hover:text-white text-xs">✕</button>
+  </div>
+), { duration: 3000 });
+
 const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, onFinalize, onReview }) => {
+  const { user } = useAuth();
+  const guard = (action: () => void) => { if (user?.isDemo) { demoToast(); return; } action(); };
   const [standings, setStandings] = useState<any[]>([]);
   const [incidents, setIncidents] = useState<any[]>([]);
   const [drivers, setDrivers] = useState<any[]>([]);
@@ -47,7 +62,7 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
       const token = localStorage.getItem('token');
       
       // Fetch race standings
-      const standingsRes = await fetch(`http://localhost:3002/api/races/${race.id}/standings`, {
+      const standingsRes = await fetch(`${API_URL}/api/races/${race.id}/standings`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -60,7 +75,7 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
       }
 
       // Fetch incidents
-      const incidentsRes = await fetch(`http://localhost:3002/api/races/${race.id}/race-incidents`, {
+      const incidentsRes = await fetch(`${API_URL}/api/races/${race.id}/race-incidents`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -70,7 +85,7 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
       }
 
       // Fetch race details to get drivers
-      const raceRes = await fetch(`http://localhost:3002/api/races/${race.id}/participants`, {
+      const raceRes = await fetch(`${API_URL}/api/races/${race.id}/participants`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -94,7 +109,7 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
     const loadingToast = toast.loading('Generating race logs...');
     
     try {
-      const response = await fetch(`http://localhost:3002/api/races/${race.id}/generate-race-logs`, {
+      const response = await fetch(`${API_URL}/api/races/${race.id}/generate-race-logs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +134,7 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
     const token = localStorage.getItem('token');
     
     try {
-      const response = await fetch(`http://localhost:3002/api/races/${race.id}/create-incident`, {
+      const response = await fetch(`${API_URL}/api/races/${race.id}/create-incident`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +161,7 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
     const loadingToast = toast.loading('Finalizing race...');
     
     try {
-      const response = await fetch(`http://localhost:3002/api/races/${race.id}/finalize`, {
+      const response = await fetch(`${API_URL}/api/races/${race.id}/finalize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -173,7 +188,7 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
     const loadingToast = toast.loading('Reviewing race...');
     
     try {
-      const response = await fetch(`http://localhost:3002/api/races/${race.id}/review`, {
+      const response = await fetch(`${API_URL}/api/races/${race.id}/review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +235,7 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
           <div className="flex items-center gap-3">
             {!hasLogs && (
               <button
-                onClick={handleGenerateLogs}
+                onClick={() => guard(handleGenerateLogs)}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
               >
                 Generate Race Logs
@@ -228,7 +243,7 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
             )}
             {hasLogs && race.status !== 'COMPLETED' && (
               <button
-                onClick={() => setIsConfirmFinalizeOpen(true)}
+                onClick={() => guard(() => setIsConfirmFinalizeOpen(true))}
                 className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
               >
                 Finalize & Publish Results
@@ -236,7 +251,7 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
             )}
             {race.status === 'COMPLETED' && !race.isReviewed && (
               <button
-                onClick={() => setIsConfirmReviewOpen(true)}
+                onClick={() => guard(() => setIsConfirmReviewOpen(true))}
                 className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
               >
                 Review & Accept Race
@@ -287,7 +302,7 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
                 Generate race logs to view standings and manage incidents
               </p>
               <button
-                onClick={handleGenerateLogs}
+                onClick={() => guard(handleGenerateLogs)}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
               >
                 Generate Race Logs
@@ -305,7 +320,7 @@ const RaceMonitoringView: React.FC<RaceMonitoringViewProps> = ({ race, onClose, 
             <div className="overflow-y-auto">
               <IncidentReviewPanel
                 incidents={incidents}
-                onAddIncident={() => setIsAddIncidentModalOpen(true)}
+                onAddIncident={() => guard(() => setIsAddIncidentModalOpen(true))}
               />
             </div>
           </div>

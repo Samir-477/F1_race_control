@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import API_URL from '../lib/config';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Trophy, Users } from 'lucide-react';
 
@@ -28,7 +29,7 @@ export default function TeamPerformance() {
       
       // Fetch team standings for season 2 (2025)
       const response = await fetch(
-        'http://localhost:3002/api/analytics/championship-standings/2/team',
+        `${API_URL}/api/analytics/championship-standings/2/team`,
         {
           headers: { 'Authorization': `Bearer ${token}` },
         }

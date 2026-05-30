@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import API_URL from '../lib/config';
 import { Trophy, Medal, Award } from 'lucide-react';
 
 interface Standing {
@@ -51,7 +52,7 @@ export default function ChampionshipStandings() {
   const fetchRaces = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3002/api/races', {
+      const response = await fetch(`${API_URL}/api/races`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       const data = await response.json();
@@ -73,7 +74,7 @@ export default function ChampionshipStandings() {
       
       // Instead of using stored procedure, fetch race results directly
       const response = await fetch(
-        `http://localhost:3002/api/races?seasonId=${selectedSeason}`,
+        `${API_URL}/api/races?seasonId=${selectedSeason}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

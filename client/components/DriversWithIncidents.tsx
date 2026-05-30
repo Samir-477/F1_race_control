@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import API_URL from '../lib/config';
 import { AlertTriangle, Filter } from 'lucide-react';
 
 interface DriverIncident {
@@ -38,7 +39,7 @@ export default function DriversWithIncidents() {
   const fetchSeasons = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3002/api/seasons', {
+      const res = await fetch(`${API_URL}/api/seasons`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -55,7 +56,7 @@ export default function DriversWithIncidents() {
       const token = localStorage.getItem('token');
       const seasonParam = selectedSeason ? `?seasonId=${selectedSeason}` : '';
       const res = await fetch(
-        `http://localhost:3002/api/analytics/drivers-with-incidents${seasonParam}`,
+        `${API_URL}/api/analytics/drivers-with-incidents${seasonParam}`,
         {
           headers: { 'Authorization': `Bearer ${token}` }
         }

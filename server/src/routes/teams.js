@@ -357,18 +357,15 @@ router.post('/:teamId/sponsors', authMiddleware, async (req, res) => {
       return res.json(updatedTeam);
     }
 
-    // Otherwise create new sponsor and connect to team
-    sponsor = await prisma.sponsor.create({
-      data: {
-        name,
-        teams: {
-          connect: { id: teamId }
-        }
-      }
-    });
+    // Find existing sponsor by name or create a new one, then connect to team
+    sponsor = await prisma.sponsor.findUnique({ where: { name } });
+    if (!sponsor) {
+      sponsor = await prisma.sponsor.create({ data: { name } });
+    }
 
-    const updatedTeam = await prisma.team.findUnique({
+    const updatedTeam = await prisma.team.update({
       where: { id: teamId },
+      data: { sponsors: { connect: { id: sponsor.id } } },
       include: { sponsors: true, drivers: true, car: true }
     });
 

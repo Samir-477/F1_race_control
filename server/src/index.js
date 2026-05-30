@@ -24,6 +24,21 @@ app.use(express.json());
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 
+// Block all write operations for demo accounts
+app.use('/api', (req, res, next) => {
+  if (req.method === 'GET' || req.method === 'OPTIONS') return next();
+  const auth = req.headers.authorization;
+  if (!auth) return next();
+  try {
+    const token = auth.split(' ')[1];
+    const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
+    if (payload.isDemo) {
+      return res.status(403).json({ error: 'Demo accounts are read-only. Log in with a real account to make changes.' });
+    }
+  } catch (_) { /* invalid token — let authMiddleware handle it */ }
+  next();
+});
+
 // Import and use API routes
 import apiRoutes from './routes/index.js';
 app.use('/api', apiRoutes);
@@ -41,8 +56,8 @@ app.post('/auth/login', async (req, res) => {
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) return res.status(401).json({ error: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, process.env.JWT_SECRET || 'dev-secret', { expiresIn: '8h' });
-    return res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
+    const token = jwt.sign({ id: user.id, username: user.username, role: user.role, isDemo: user.isDemo }, process.env.JWT_SECRET || 'dev-secret', { expiresIn: '8h' });
+    return res.json({ token, user: { id: user.id, username: user.username, role: user.role, isDemo: user.isDemo } });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Server error' });

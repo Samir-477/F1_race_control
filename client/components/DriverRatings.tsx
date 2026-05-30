@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import API_URL from '../lib/config';
 import { TrendingUp, Trophy, Award, Star, Activity, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface Season {
@@ -56,7 +57,7 @@ export default function DriverRatings() {
   const fetchSeasons = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3002/api/seasons', {
+      const res = await fetch(`${API_URL}/api/seasons`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -81,7 +82,7 @@ export default function DriverRatings() {
   const fetchDrivers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3002/api/drivers', {
+      const res = await fetch(`${API_URL}/api/drivers`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -108,7 +109,7 @@ export default function DriverRatings() {
       const ratingPromises = drivers.map(async (driver) => {
         try {
           const res = await fetch(
-            `http://localhost:3002/api/analytics/driver-performance/${driver.id}/${selectedSeason}`,
+            `${API_URL}/api/analytics/driver-performance/${driver.id}/${selectedSeason}`,
             { headers: { 'Authorization': `Bearer ${token}` } }
           );
           
@@ -121,7 +122,7 @@ export default function DriverRatings() {
           
           // Also fetch race results to get additional stats
           const statsRes = await fetch(
-            `http://localhost:3002/api/drivers/${driver.id}/race-results?seasonId=${selectedSeason}`,
+            `${API_URL}/api/drivers/${driver.id}/race-results?seasonId=${selectedSeason}`,
             { headers: { 'Authorization': `Bearer ${token}` } }
           );
           

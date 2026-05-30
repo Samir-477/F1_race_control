@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
+import API_URL from '../lib/config';
 import toast from 'react-hot-toast';
 
 interface CreateTeamModalProps {
@@ -55,7 +56,7 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ onClose, onSuccess })
       
       console.log('Creating team with data:', filteredData);
       
-      const response = await fetch('http://localhost:3002/api/teams', {
+      const response = await fetch(`${API_URL}/api/teams`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

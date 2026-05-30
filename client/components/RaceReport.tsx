@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
+import API_URL from '../lib/config';
 import { FileText, X, Download, Flag, AlertCircle, Award } from 'lucide-react';
 
 interface RaceReportProps {
@@ -59,7 +60,7 @@ export default function RaceReport({ raceId, raceName, onClose }: RaceReportProp
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(
-        `http://localhost:3002/api/analytics/race-report/${raceId}`,
+        `${API_URL}/api/analytics/race-report/${raceId}`,
         {
           headers: { 'Authorization': `Bearer ${token}` }
         }

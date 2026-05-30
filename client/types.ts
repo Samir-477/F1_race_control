@@ -37,6 +37,8 @@ export interface Team {
   color: string; // Hex color code
   textColor?: string;
   backgroundImageUrl?: string;
+  backgroundPosition?: string;
+  backgroundSize?: string;
 }
 
 export interface RaceIncident {
@@ -82,4 +84,5 @@ export interface User {
   id: number;
   username: string;
   role: UserRole | string;
+  isDemo?: boolean;
 }

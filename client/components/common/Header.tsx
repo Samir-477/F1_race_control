@@ -19,25 +19,32 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, onLoginClick, isDashboard }
 
   const headerBaseClasses = "fixed top-0 left-0 w-full z-20 transition-colors duration-300";
   const dashboardClasses = "bg-[#0d1117] shadow-lg";
-  const landingClasses = "bg-transparent";
+  const landingClasses = "bg-gradient-to-b from-black/60 to-transparent";
 
   return (
     <header className={`${headerBaseClasses} ${isDashboard ? dashboardClasses : landingClasses}`}>
       <div className="mx-auto w-[90%] max-w-7xl">
-        <nav className="flex justify-between items-center h-24">
+        <nav className="flex justify-between items-center h-20">
           <div className="flex items-center gap-12 pointer-events-auto">
             <button onClick={() => onNavigate('landing')} className="focus:outline-none">
-              <img src={f1sysLogo} alt="F1 System Logo" className="w-32 h-auto" />
+              <img src={f1sysLogo} alt="F1 System Logo" className="w-28 h-auto" />
             </button>
           </div>
-          <div className="flex items-center gap-8 pointer-events-auto">
+          <div className="flex items-center gap-4 pointer-events-auto">
             {user ? (
               <>
-                <button onClick={() => onNavigate('dashboard')} className="text-white uppercase font-semibold text-sm tracking-wider hover:text-yellow-500 transition-colors">Dashboard</button>
+                {!isDashboard && (
+                  <button onClick={() => onNavigate('dashboard')} className="text-white uppercase font-semibold text-sm tracking-wider hover:text-yellow-500 transition-colors">Dashboard</button>
+                )}
                 <button onClick={handleLogout} className="text-white uppercase font-semibold text-sm tracking-wider hover:text-yellow-500 transition-colors">Logout</button>
               </>
             ) : (
-              <button onClick={onLoginClick} className="text-white uppercase font-semibold text-sm tracking-wider hover:text-red-500 transition-colors">Login</button>
+              <button
+                onClick={onLoginClick}
+                className="px-5 py-1.5 text-xs font-bold uppercase border border-white text-white hover:bg-white hover:text-black transition-all duration-300 tracking-wider"
+              >
+                Login
+              </button>
             )}
           </div>
         </nav>

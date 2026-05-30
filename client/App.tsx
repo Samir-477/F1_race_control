@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import LandingPage from './components/LandingPage';
-import LoginModal from './components/LoginPage';
 import AdminDashboard from './components/AdminDashboard';
 import StewardDashboard from './components/StewardDashboard';
 import Header from './components/common/Header';
-import { TEAMS, RACES } from './data/mockData';
+import LoginModal from './components/LoginPage';
+import { TEAMS } from './data/mockData';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { UserRole } from './types';
 
@@ -13,24 +13,19 @@ type Page = 'landing' | 'dashboard';
 
 const AppContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   const { user } = useAuth();
 
   const isDashboard = currentPage === 'dashboard' && !!user;
 
+  // Show/hide the vanilla-JS hero section based on current page
   useEffect(() => {
-    console.log('User state changed:', user);
-    console.log('Current page:', currentPage);
-  }, [user, currentPage]);
+    const hero = document.getElementById('hero-section');
+    if (hero) hero.style.display = isDashboard ? 'none' : 'block';
+  }, [isDashboard]);
 
   const handleNavigate = (page: Page) => {
     setCurrentPage(page);
-  };
-  
-  const handleLoginSuccess = () => {
-    setIsLoginModalOpen(false);
-    setCurrentPage('dashboard');
-    console.log('Login successful, user:', user);
   };
 
   const renderPage = () => {
@@ -55,7 +50,7 @@ const AppContent: React.FC = () => {
   return (
     <div className="bg-gray-900">
       <Toaster 
-        position="top-center"
+        position="top-right"
         toastOptions={{
           duration: 3000,
           style: {
@@ -77,15 +72,15 @@ const AppContent: React.FC = () => {
           },
         }}
       />
-      <Header 
-        onNavigate={handleNavigate} 
-        onLoginClick={() => setIsLoginModalOpen(true)}
+      <Header
+        onNavigate={handleNavigate}
+        onLoginClick={() => setShowLogin(true)}
         isDashboard={isDashboard}
       />
-      {isLoginModalOpen && (
-        <LoginModal 
-          onLoginSuccess={handleLoginSuccess} 
-          onClose={() => setIsLoginModalOpen(false)} 
+      {showLogin && (
+        <LoginModal
+          onLoginSuccess={() => { setShowLogin(false); setCurrentPage('dashboard'); }}
+          onClose={() => setShowLogin(false)}
         />
       )}
       <main>

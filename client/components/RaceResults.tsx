@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import API_URL from '../lib/config';
 
 interface RaceStanding {
   position: number;
@@ -34,7 +35,7 @@ const RaceResults: React.FC = () => {
 
   const fetchLatestRace = async () => {
     try {
-      const response = await fetch('http://localhost:3002/api/races/latest-result', {
+      const response = await fetch(`${API_URL}/api/races/latest-result`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache'

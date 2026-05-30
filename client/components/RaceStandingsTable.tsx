@@ -1,4 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
+import API_URL from '../lib/config';
 
 interface Standing {
   position: number;

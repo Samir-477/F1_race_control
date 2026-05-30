@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import API_URL from '../lib/config';
 import toast from 'react-hot-toast';
 import type { Team, Driver, Sponsor, Car } from '../types';
 import { useAuth } from '../contexts/AuthContext';
@@ -66,12 +67,26 @@ const SaveButton: React.FC = () => (
 );
 
 
+const demoToast = () => toast.custom((t) => (
+  <div className="bg-[#1f2937] border border-yellow-500/40 rounded-lg p-4 shadow-xl flex items-start gap-3 max-w-xs" style={{ zIndex: 9999 }}>
+    <span className="text-yellow-400 text-lg mt-0.5">🔒</span>
+    <div className="flex-1">
+      <p className="text-white font-bold text-sm">Demo Account</p>
+      <p className="text-gray-400 text-xs mt-0.5">Log in as admin or steward to make changes.</p>
+    </div>
+    <button onClick={() => toast.dismiss(t.id)} className="text-gray-500 hover:text-white text-xs">✕</button>
+  </div>
+), { duration: 3000 });
+
 // Team Editor Component
-const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => void }> = ({ team, onBack, onUpdate }) => {
+const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => void; isDemo?: boolean }> = ({ team, onBack, onUpdate, isDemo }) => {
   const [activeTab, setActiveTab] = useState('details');
   const [loading, setLoading] = useState(false);
 
+  const guard = (action: () => void) => { if (isDemo) { demoToast(); return; } action(); };
+
   const handleSubmit = async (formData: any, section?: string) => {
+    if (isDemo) { demoToast(); return; }
     setLoading(true);
 
     try {
@@ -80,7 +95,7 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => vo
 
       // Handle driver creation separately
       if (section === 'drivers') {
-        response = await fetch(`http://localhost:3002/api/teams/${team.id}/drivers`, {
+        response = await fetch(`${API_URL}/api/teams/${team.id}/drivers`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -91,7 +106,7 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => vo
       }
       // Handle sponsor creation separately
       else if (section === 'sponsors') {
-        response = await fetch(`http://localhost:3002/api/teams/${team.id}/sponsors`, {
+        response = await fetch(`${API_URL}/api/teams/${team.id}/sponsors`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -102,7 +117,7 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => vo
       }
       // Handle team details and car updates
       else {
-        response = await fetch(`http://localhost:3002/api/teams/${team.id}`, {
+        response = await fetch(`${API_URL}/api/teams/${team.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -179,21 +194,19 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => vo
                   </div>
                   <button
                     type="button"
-                    onClick={async () => {
+                    onClick={() => guard(async () => {
                       try {
                         const token = localStorage.getItem('token');
-                        await fetch(`http://localhost:3002/api/teams/${team.id}/drivers/${driver.id}`, {
+                        await fetch(`${API_URL}/api/teams/${team.id}/drivers/${driver.id}`, {
                           method: 'DELETE',
-                          headers: {
-                            'Authorization': `Bearer ${token}`
-                          }
+                          headers: { 'Authorization': `Bearer ${token}` }
                         });
                         toast.success('Driver removed successfully');
                         if (onUpdate) onUpdate();
                       } catch (err: any) {
                         toast.error(err.message || 'Failed to remove driver');
                       }
-                    }}
+                    })}
                     className="text-red-500 hover:text-red-400 p-2"
                   >
                     Remove
@@ -230,21 +243,19 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => vo
                     </div>
                     <button
                       type="button"
-                      onClick={async () => {
+                      onClick={() => guard(async () => {
                         try {
                           const token = localStorage.getItem('token');
-                          await fetch(`http://localhost:3002/api/teams/${team.id}/sponsors/${sponsor.id}`, {
+                          await fetch(`${API_URL}/api/teams/${team.id}/sponsors/${sponsor.id}`, {
                             method: 'DELETE',
-                            headers: {
-                              'Authorization': `Bearer ${token}`
-                            }
+                            headers: { 'Authorization': `Bearer ${token}` }
                           });
                           toast.success('Sponsor removed successfully');
                           if (onUpdate) onUpdate();
                         } catch (err: any) {
                           toast.error(err.message || 'Failed to remove sponsor');
                         }
-                      }}
+                      })}
                       className="text-red-500 hover:text-red-400 p-2"
                     >
                       Remove
@@ -291,24 +302,32 @@ const TeamEditor: React.FC<{ team: Team; onBack: () => void; onUpdate?: () => vo
   }
 
   return (
-     <div className="bg-[#161b22] p-6 rounded-lg border border-gray-700">
-        <div className="flex justify-between items-start mb-6">
+    <div className="bg-[#161b22] rounded-lg border border-gray-700/60">
+      <div className="px-6 py-5 border-b border-gray-700/60 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full" style={{ backgroundColor: team.color }}></div>
           <div>
-            <h2 className="text-3xl font-bold">{team.fullName}</h2>
-            <p className="text-lg text-gray-400">Editing Team Profile</p>
+            <h2 className="text-lg font-bold text-white">{team.fullName}</h2>
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Editing Team Profile</p>
           </div>
-          <button onClick={onBack} className="text-base text-gray-300 hover:text-white">&larr; Back to Teams</button>
         </div>
-        <div className="flex items-center gap-2 mb-6 border-b border-gray-700 pb-3">
-            <EditorTabButton active={activeTab === 'details'} onClick={() => setActiveTab('details')}>Details</EditorTabButton>
-            <EditorTabButton active={activeTab === 'drivers'} onClick={() => setActiveTab('drivers')}>Drivers</EditorTabButton>
-            <EditorTabButton active={activeTab === 'sponsors'} onClick={() => setActiveTab('sponsors')}>Sponsors</EditorTabButton>
-            <EditorTabButton active={activeTab === 'car'} onClick={() => setActiveTab('car')}>Car</EditorTabButton>
-        </div>
-        <div>
-            {renderEditorContent()}
-        </div>
-     </div>
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-gray-600 text-gray-400 hover:bg-gray-700 hover:text-white transition-all"
+        >
+          ← Back
+        </button>
+      </div>
+      <div className="px-6 pt-4 border-b border-gray-700/60 flex gap-1">
+        <EditorTabButton active={activeTab === 'details'} onClick={() => setActiveTab('details')}>Details</EditorTabButton>
+        <EditorTabButton active={activeTab === 'drivers'} onClick={() => setActiveTab('drivers')}>Drivers</EditorTabButton>
+        <EditorTabButton active={activeTab === 'sponsors'} onClick={() => setActiveTab('sponsors')}>Sponsors</EditorTabButton>
+        <EditorTabButton active={activeTab === 'car'} onClick={() => setActiveTab('car')}>Car</EditorTabButton>
+      </div>
+      <div className="p-6">
+        {renderEditorContent()}
+      </div>
+    </div>
   );
 };
 
@@ -328,7 +347,7 @@ const AdminDashboard: React.FC = () => {
   const fetchTeams = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3002/api/teams');
+      const response = await fetch(`${API_URL}/api/teams`);
       if (response.ok) {
         const data = await response.json();
         setTeams(data);
@@ -386,37 +405,53 @@ const AdminDashboard: React.FC = () => {
     if (editingTeam) {
       const currentTeam = teams.find(t => t.id === editingTeam.id) || editingTeam;
       return (
-        <TeamEditor 
-          team={currentTeam} 
+        <TeamEditor
+          team={currentTeam}
           onBack={() => { setEditingTeam(null); fetchTeams(); }}
           onUpdate={fetchTeams}
+          isDemo={user?.isDemo}
         />
       );
     }
 
     return (
-      <div className="bg-[#161b22] p-6 rounded-lg border border-gray-700">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold">Team Management</h2>
-          <button 
-            onClick={() => setShowCreateModal(true)}
-            className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded transition-colors text-base"
+      <div className="bg-[#161b22] rounded-lg border border-gray-700/60">
+        <div className="px-6 py-5 border-b border-gray-700/60 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-6 bg-yellow-500 rounded-full"></div>
+            <h2 className="text-xl font-bold tracking-wide uppercase">Team Management</h2>
+          </div>
+          <button
+            onClick={() => guard(() => setShowCreateModal(true))}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-bold uppercase tracking-wider transition-colors"
           >
-            Create New Team
+            + New Team
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {teams.map(team => (
-            <div key={team.id} className="bg-[#2d3748] p-4 rounded-lg flex flex-col justify-between">
-              <div>
-                <h3 className="font-bold text-xl">{team.name}</h3>
-                <p className="text-base text-gray-400">{team.fullName}</p>
+            <div
+              key={team.id}
+              className="bg-[#0d1117] rounded-lg border border-gray-700/60 overflow-hidden flex flex-col"
+              style={{ borderLeftColor: team.color, borderLeftWidth: 3 }}
+            >
+              <div className="p-4 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: team.color }}></div>
+                  <h3 className="font-bold text-white truncate">{team.name}</h3>
+                </div>
+                <p className="text-xs text-gray-500 mb-3 truncate">{team.fullName}</p>
+                <div className="flex gap-3 text-xs text-gray-500">
+                  <span>{team.drivers?.length ?? 0} driver{(team.drivers?.length ?? 0) !== 1 ? 's' : ''}</span>
+                  <span>·</span>
+                  <span>{team.sponsors?.length ?? 0} sponsor{(team.sponsors?.length ?? 0) !== 1 ? 's' : ''}</span>
+                </div>
               </div>
-              <button 
-                onClick={() => setEditingTeam(team)}
-                className="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white text-base font-bold py-2 px-4 rounded transition-colors"
+              <button
+                onClick={() => guard(() => setEditingTeam(team))}
+                className="w-full py-2.5 text-xs font-bold uppercase tracking-wider border-t border-gray-700/60 text-gray-400 hover:bg-yellow-500 hover:text-black hover:border-yellow-500 transition-all duration-200"
               >
-                Manage Team
+                Manage →
               </button>
             </div>
           ))}
@@ -424,6 +459,8 @@ const AdminDashboard: React.FC = () => {
       </div>
     );
   };
+
+  const guard = (action: () => void) => { if (user?.isDemo) { demoToast(); return; } action(); };
 
   const SidebarButton: React.FC<{ viewName: string; label: string }> = ({ viewName, label }) => (
     <button
@@ -439,27 +476,45 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0d1117] px-4 sm:px-8 pb-8 text-gray-200 font-inter">
-      <div className="h-28"></div> {/* Spacer for fixed navbar */}
+      <div className="h-20"></div> {/* Spacer for fixed navbar */}
+      {user?.isDemo && (
+        <div className="-mx-4 sm:-mx-8 bg-yellow-500 text-black text-center text-sm font-bold py-2 tracking-wide mb-6">
+          DEMO MODE — Read Only. Actions are disabled.
+        </div>
+      )}
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-5xl font-black mb-12 uppercase tracking-wide">Admin Dashboard</h1>
-        
-        <div className="flex flex-col md:flex-row gap-8 md:items-start">
-          <aside className="md:w-1/3 lg:w-1/4 bg-[#161b22] p-4 rounded-lg border border-gray-700 self-stretch">
-            <nav className="flex flex-col gap-2">
-              <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-2">Management</div>
-              <SidebarButton viewName="teams" label="Team Management" />
-              <SidebarButton viewName="stewards" label="Steward Management" />
-              <SidebarButton viewName="races" label="Race Management" />
-              
-              <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-2 mt-4">Analytics & Reports</div>
-              <SidebarButton viewName="championship" label="Championship Standings" />
-              <SidebarButton viewName="race-report" label="Team Performance" />
-              <SidebarButton viewName="penalties" label="Penalty Statistics" />
-              <SidebarButton viewName="incidents" label="Drivers with Incidents" />
-              
-              <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-2 mt-4">Database Features</div>
-              <SidebarButton viewName="triggers" label="Trigger Management" />
-              <SidebarButton viewName="driver-ratings" label="Driver Ratings" />
+        <div className="mb-10">
+          <p className="text-yellow-500 text-xs font-bold uppercase tracking-widest mb-1">FIA Race Control</p>
+          <h1 className="text-4xl font-black uppercase tracking-wide">Admin Dashboard</h1>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-6 md:items-start">
+          <aside className="md:w-56 lg:w-52 flex-shrink-0">
+            <nav className="bg-[#161b22] rounded-lg border border-gray-700/60 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-700/60">
+                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Management</p>
+              </div>
+              <div className="p-2 flex flex-col gap-1">
+                <SidebarButton viewName="teams" label="Teams" />
+                <SidebarButton viewName="stewards" label="Stewards" />
+                <SidebarButton viewName="races" label="Races" />
+              </div>
+              <div className="px-4 py-3 border-t border-b border-gray-700/60">
+                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Analytics</p>
+              </div>
+              <div className="p-2 flex flex-col gap-1">
+                <SidebarButton viewName="championship" label="Championship" />
+                <SidebarButton viewName="race-report" label="Team Performance" />
+                <SidebarButton viewName="penalties" label="Penalties" />
+                <SidebarButton viewName="incidents" label="Incidents" />
+              </div>
+              <div className="px-4 py-3 border-t border-b border-gray-700/60">
+                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Database</p>
+              </div>
+              <div className="p-2 flex flex-col gap-1">
+                <SidebarButton viewName="triggers" label="Triggers" />
+                <SidebarButton viewName="driver-ratings" label="Driver Ratings" />
+              </div>
             </nav>
           </aside>
           <main className="flex-1">

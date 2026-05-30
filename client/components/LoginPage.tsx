@@ -1,5 +1,6 @@
-
+﻿
 import React, { useState } from 'react';
+import API_URL from '../lib/config';
 import { useAuth } from '../contexts/AuthContext';
 
 interface LoginModalProps {
@@ -20,7 +21,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess, onClose }) => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3002/auth/login', {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +49,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/75 flex items-center justify-center p-4" style={{ zIndex: 200 }} onClick={onClose}>
       <div 
         className="w-full max-w-md bg-gray-800 p-8 rounded-lg shadow-2xl"
         onClick={e => e.stopPropagation()}
@@ -95,6 +96,20 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess, onClose }) => {
             </button>
           </div>
         </form>
+
+        <div className="mt-6 border-t border-gray-700 pt-4">
+          <p className="text-center text-gray-500 text-xs uppercase tracking-widest mb-3">Demo Access (Read-Only)</p>
+          <div className="flex gap-2 text-xs text-gray-400">
+            <div className="flex-1 bg-gray-700/50 rounded p-2">
+              <p className="font-bold text-gray-300 mb-1">Admin View</p>
+              <p>demo_admin / demo123</p>
+            </div>
+            <div className="flex-1 bg-gray-700/50 rounded p-2">
+              <p className="font-bold text-gray-300 mb-1">Steward View</p>
+              <p>demo_steward / demo123</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
