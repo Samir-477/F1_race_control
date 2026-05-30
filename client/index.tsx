@@ -2,6 +2,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { initMockFetch } from './lib/mockFetch';
+
+if (import.meta.env.VITE_MOCK === 'true') {
+  initMockFetch();
+}
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
